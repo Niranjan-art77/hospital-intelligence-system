@@ -1,9 +1,10 @@
 import axios from "axios";
 
 // Determine the base URL for the API
-// Uses VITE_API_URL env var in production (set on Render/Vercel)
-// Falls back to "/api" for local development (proxied by server.cjs)
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+// 1. Check VITE_API_URL (Env Var)
+// 2. Fallback to your specific Render URL
+// 3. Fallback to "/api" (Local Development)
+const API_URL = import.meta.env.VITE_API_URL || "https://hospital-intelligence-system-2.onrender.com/api" || "/api";
 
 const API = axios.create({
   baseURL: API_URL,
