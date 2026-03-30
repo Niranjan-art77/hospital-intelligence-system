@@ -1,0 +1,72 @@
+# ── Node / Frontend (not needed for backend Docker build) ──
+node_modules/
+dist/
+dist-ssr/
+build/
+package.json
+package-lock.json
+vite.config.js
+eslint.config.js
+index.html
+netlify.toml
+server.cjs
+lt.cjs
+
+# ── Frontend source ──
+src/components/
+src/pages/
+src/layouts/
+src/context/
+src/styles/
+src/assets/
+src/utils/
+src/services/
+src/App.jsx
+src/App.css
+src/main.jsx
+src/index.css
+public/
+
+# ── Build artifacts ──
+target/
+*.jar
+*.war
+*.class
+
+# ── IDE / Editor ──
+.vscode/
+.idea/
+*.suo
+*.sw?
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Environment ──
+.env
+.env.*
+
+# ── Local tools ──
+.tools/
+node/
+cloudflared.exe
+
+# ── Database files ──
+*.mv.db
+*.trace.db
+*.db
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Scripts (not needed in container) ──
+*.ps1
+*.txt
+*.md
+
+# ── Git ──
+.git
+.gitignore
