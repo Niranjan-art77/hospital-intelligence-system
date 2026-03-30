@@ -1,0 +1,12 @@
+.git
+.mvn/wrapper/*.jar
+target/
+*.log
+node_modules/
+dist/
+.vscode/
+.idea/
+cloudflared.exe
+pinggy_out.txt
+localtunnel_url.txt
+hospital-intelligence-system-main/
