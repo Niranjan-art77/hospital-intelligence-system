@@ -1,55 +1,59 @@
 # Health Intelligence System
 
-This project consists of a React (Vite) frontend and a Python (Flask) backend, prepared for automatic deployment using Vercel and Railway.
+This project consists of a **React (Vite)** frontend and a **Java (Spring Boot)** backend, prepared for deployment on **Render**.
 
-## 🚂 Backend Deployment (Railway)
+## 🚀 Deployment on Render
 
-The backend is built with Python 3 and Flask. It uses a local SQLite database by default, seeded with dummy data for Doctors, Bills, and Reports.
+### Backend (Java Spring Boot)
 
-1. **Create a Railway Account**: Sign up at [Railway.app](https://railway.app/).
-2. **Create a New Project**: Choose "Deploy from GitHub repo".
-3. **Select the Repository**: Choose the repository containing this project.
-4. **Configure Root Directory**: In settings, change the **Root Directory** to `/backend`.
-5. **Set Environment Variables**: 
-   - `PORT=5000`
-6. **Automatic Build & Deploy**: Railway will automatically detect the `requirements.txt` and `Procfile` (`web: gunicorn app:app`) and deploy the Flask server.
-7. **Copy URL**: Once deployed, copy your Railway public URL (e.g., `https://health-intelligence-production.up.railway.app`).
+The backend is built with Java 17 and Spring Boot. It uses an embedded H2 database seeded with demo data.
 
-## 🌐 Frontend Deployment (Vercel)
+1. **Create a Render Account**: Sign up at [Render.com](https://render.com/).
+2. **Create a New Web Service**: Choose "Deploy from GitHub repo".
+3. **Select the Repository**: Choose this repository.
+4. **Configure Settings**:
+   - **Runtime**: Java
+   - **Build Command**: `chmod +x mvnw && ./mvnw clean package -DskipTests`
+   - **Start Command**: `java -Dserver.port=$PORT -jar target/hospital-intelligence-0.0.1-SNAPSHOT.jar`
+5. **Set Environment Variables**:
+   - `PORT=8080`
+6. **Deploy**: Render will build the JAR and start the server.
+7. **Copy URL**: Once deployed, copy your Render public URL (e.g., `https://hospital-backend.onrender.com`).
 
-The frontend is built with React and Vite. It is configured to automatically route all API calls to the backend using environment variables.
+### Frontend (React Static Site)
 
-1. **Create a Vercel Account**: Sign up at [Vercel.com](https://vercel.com/).
-2. **Create a New Project**: Import the same GitHub repository.
-3. **Configure Build Settings**: Vercel will automatically detect Vite. 
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-4. **Set Environment Variables**:
-   - Add `VITE_API_URL` and set its value to your Railway Backend URL appended with `/api` (e.g., `https://health-intelligence-production.up.railway.app/api`).
-5. **Deploy**: Click deploy. Vercel will build and serve your frontend, with API requests securely pointed to your Railway backend.
+The frontend is built with React and Vite. It connects to the backend via the `VITE_API_URL` environment variable.
+
+1. **Create a New Static Site** on Render (or use Vercel/Netlify).
+2. **Configure Build Settings**:
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+3. **Set Environment Variables**:
+   - `VITE_API_URL` = your backend URL + `/api` (e.g., `https://hospital-backend.onrender.com/api`)
+4. **Deploy**: The frontend will be built and served as a static site.
+
+> **Tip**: You can also use the included `render.yaml` for automatic Blueprint deployment — just connect your repo and Render will set up both services.
 
 ## ⚙️ Local Development Setup
 
-To run the full stack locally:
+### 1. Terminal 1: Backend (Spring Boot)
 
-### 1. Terminal 1: Backend
-```bash
-cd backend
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
-
-pip install -r requirements.txt
-python app.py
+**Option A — Using start-backend.ps1 (Windows, auto-downloads JDK & Maven):**
+```powershell
+.\start-backend.ps1
 ```
-*Backend runs on `http://localhost:5000`*
 
-### 2. Terminal 2: Frontend
-Create a `.env.local` file in the root folder (or rename `.env.example`):
+**Option B — If you have Java 17 & Maven installed:**
+```bash
+./mvnw clean spring-boot:run
+```
+*Backend runs on `http://localhost:8080`*
+
+### 2. Terminal 2: Frontend (Vite)
+
+Create a `.env.local` file in the root folder:
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:8080/api
 ```
 
 Run the dev server:
@@ -59,9 +63,13 @@ npm run dev
 ```
 *Frontend runs on Vite's default port (usually `http://localhost:5173`).*
 
-## features
-- Interactive Dashboard with Chart.js
+## Features
+- Interactive Dashboard with Chart.js & Recharts
 - Real-time Collapsible Sidebar
 - Rule-based AI Symptom Checker
-- Medical Reports (Base64) with automated PDF Generation (Reportlab)
-- DB-based Messaging System with SQLite
+- Medical Reports with PDF Generation
+- DB-based Messaging System
+- Doctor, Patient, Billing, Pharmacy Management
+- Bed Management & Live Monitoring
+- JWT Authentication & Role-based Security
+- QR Code Health Cards

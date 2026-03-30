@@ -1,12 +1,9 @@
 import axios from "axios";
 
 // Determine the base URL for the API
-// Priority:
-// 1. VITE_API_URL (explicit override)
-// 2. VITE_API_BASE_URL (standard)
-// 3. Built-in Production URL (fallback)
-// 4. Localhost (development)
-const API_URL = "/api";
+// Uses VITE_API_URL env var in production (set on Render/Vercel)
+// Falls back to "/api" for local development (proxied by server.cjs)
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 const API = axios.create({
   baseURL: API_URL,

@@ -105,4 +105,9 @@ desktop.ini
 
 .tools/
 node/
-*.exe
+cloudflared.exe
+
+# ==============================
+# Maven wrapper (do NOT ignore .mvn/)
+# ==============================
+!.mvn/wrapper/maven-wrapper.properties
