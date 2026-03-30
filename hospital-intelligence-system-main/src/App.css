@@ -1,0 +1,6 @@
+/* App.css is largely deprecated due to Tailwind & index.css but kept for fallback styles */
+.page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}

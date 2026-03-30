@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: hospital-backend-java
+    env: java
+    plan: free
+    region: singapore
+    buildCommand: "./mvnw clean package -DskipTests || mvn clean package -DskipTests"
+    startCommand: "java -jar target/hospital-intelligence-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: PORT
+        value: "8080"

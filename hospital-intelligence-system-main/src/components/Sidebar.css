@@ -1,0 +1,8 @@
+.text-bar{
+    text-decoration: none;
+    color: #ccc;
+    
+}
+.text-bar:hover{
+    color: white;
+}
