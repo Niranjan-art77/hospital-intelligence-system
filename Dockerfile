@@ -11,10 +11,14 @@ WORKDIR /app
 
 # Create and use a non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
 
 # Copy the built JAR from the builder stage
 COPY --from=builder /app/target/hospital-intelligence-0.0.1-SNAPSHOT.jar app.jar
+
+# Grant ownership of /app to appuser (fixes AccessDeniedException for H2 database)
+RUN chown -R appuser:appgroup /app
+
+USER appuser
 
 # Port handling for Render
 ENV PORT=8080
