@@ -309,7 +309,8 @@ export default function PatientDashboard() {
 
                 {/* Advanced Analytics Dashboard */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
-                    {/* Health Score Analy                     <ErrorBoundary>
+                    {/* Health Score Analytics */}
+                    <ErrorBoundary>
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -343,9 +344,10 @@ export default function PatientDashboard() {
                                 </div>
                             </div>
                         </motion.div>
-                    </ErrorBoundary>otion.div>
+                    </ErrorBoundary>
 
-                    {/* Vitals Trend C                     <ErrorBoundary className="lg:col-span-2">
+                    {/* Vitals Trend Chart */}
+                    <ErrorBoundary>
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -377,7 +379,7 @@ export default function PatientDashboard() {
                                 </div>
                             </div>
                         </motion.div>
-                    </ErrorBoundary>otion.div>
+                    </ErrorBoundary>
 
                     {/* Appointment Analytics */}
                     <motion.div 
@@ -410,7 +412,8 @@ export default function PatientDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* LEFT COLUMN */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Next Appointment                          <ErrorBoundary>
+                        {/* Next Appointment */}
+                        <ErrorBoundary>
                             <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-3xl border border-blue-500/20 p-8 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
                                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
@@ -446,7 +449,7 @@ export default function PatientDashboard() {
                                     </div>
                                 )}
                             </div>
-                        </ErrorBoundary>             </div>
+                        </ErrorBoundary>
 
                         {/* Middle Row: Meds & Intelligence Vault */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -586,7 +589,8 @@ export default function PatientDashboard() {
                             </div>
                         </div>
 
-                        {/* Nearby                          <ErrorBoundary>
+                        {/* Nearby Emergency Hubs */}
+                        <ErrorBoundary>
                             <div className="bg-slate-900/50 backdrop-blur-3xl border border-white/5 p-8 rounded-[3rem] shadow-2xl h-80 flex flex-col overflow-hidden">
                                 <h3 className="text-xl font-bold mb-4 flex items-center justify-between">
                                     <span className="flex items-center gap-3"><MapPin className="w-5 h-5 text-rose-400" /> Emergency Hubs</span>
@@ -602,7 +606,7 @@ export default function PatientDashboard() {
                                     </MapContainer>
                                 </div>
                             </div>
-                        </ErrorBoundary>             </div>
+                        </ErrorBoundary>
 
                         {/* Billing Widget */}
                         <div className="bg-slate-900/50 backdrop-blur-3xl border border-white/5 p-8 rounded-[3rem] shadow-2xl">
