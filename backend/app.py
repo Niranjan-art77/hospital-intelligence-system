@@ -15,6 +15,11 @@ def create_app():
         return jsonify({"status": "ok"})
 
     # Register blueprints (routes)
+    from routes.doctors import doctors_bp
+    from routes.billing import billing_bp
+    from routes.auth import auth_bp
+    from routes.patients_mgmt import patients_bp
+    from routes.appointments import appointments_bp
     from routes.prescriptions import prescriptions_bp
     from routes.emergency import emergency_bp
     from routes.messages import messages_bp

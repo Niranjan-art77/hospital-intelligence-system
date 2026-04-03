@@ -63,7 +63,46 @@ export default function PatientHealthMonitor() {
         stress: { label: "Stress Level", color: "#8b5cf6", unit: "%", normal: "< 30%", icon: Brain }
     };
 
-    const selected = metrics[activeMetric];
+    const fetchHealthData = async () => {
+        try {
+            const vitalsRes = await API.get(`/patients/${user.id}/vitals`);
+            if (vitalsRes.data && vitalsRes.data.length > 0) {
+                const mappedVitals = vitalsRes.data.map(v => {
+                    const bpParts = typeof v.bloodPressure === 'string' ? v.bloodPressure.split('/') : [120, 80];
+                    return {
+                        day: new Date(v.recordedAt).toLocaleDateString('en', { day: 'numeric', month: 'short' }),
+                        heartRate: parseInt(v.heartRate) || 72,
+                        oxygenLevel: parseInt(v.oxygenLevel) || 98,
+                        bloodPressure: parseInt(bpParts[0]) || 120,
+                        temperature: parseFloat(v.temperature) || 98.6
+                    };
+                }).reverse();
+                setHistoricalData(mappedVitals);
+                
+                const latest = mappedVitals[mappedVitals.length - 1];
+                setRealTimeData({
+                    heart: `${latest.heartRate} bpm`,
+                    bp: `${vitalsRes.data[0].bloodPressure} mmHg`,
+                    oxygen: `${latest.oxygenLevel} %`,
+                    temp: `${latest.temperature} °F`
+                });
+            }
+        } catch (error) {
+            console.error("Health Data Fetch Failed", error);
+        }
+    };
+
+    useEffect(() => {
+        if (user?.id) fetchHealthData();
+    }, [user?.id]);
+
+    const getMetricData = (metric) => {
+        const keyMap = { heart: 'heartRate', bp: 'bloodPressure', oxygen: 'oxygenLevel', temperature: 'temperature' };
+        const key = keyMap[metric] || 'heartRate';
+        return historicalData.length > 0 ? historicalData.map(d => ({ day: d.day, value: d[key] })) : [];
+    };
+
+    const selected = { ...metrics[activeMetric], data: getMetricData(activeMetric) };
 
     return (
         <div style={{ padding: "28px", minHeight: "100vh", background: "#060d1f", color: "#e2f0ff", fontFamily: "'Inter', sans-serif" }}>

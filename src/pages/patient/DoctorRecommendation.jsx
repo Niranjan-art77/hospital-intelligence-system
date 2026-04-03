@@ -27,6 +27,13 @@ export default function DoctorRecommendation() {
     const [sortBy, setSortBy] = useState("match");
     const [showFilters, setShowFilters] = useState(false);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const radarData = [
+        { metric: "Symptom Match", value: 85, fullMark: 100 },
+        { metric: "Experience", value: 78, fullMark: 100 },
+        { metric: "Availability", value: 90, fullMark: 100 },
+        { metric: "Affordability", value: 72, fullMark: 100 },
+        { metric: "Rating", value: 65, fullMark: 100 },
+    ];
     const [comparisonList, setComparisonList] = useState([]);
     const navigate = useNavigate();
 
@@ -49,41 +56,33 @@ export default function DoctorRecommendation() {
         setSearched(true);
         
         try {
-            const analysisData = {
+            const response = await API.post('/ai/recommend-doctor', {
                 symptoms,
-                patientId: user?.id,
-                preferences: {
-                    specialty: selectedSpecialty,
-                    experience: selectedExperience,
-                    priceRange,
-                    sortBy
-                },
-                location: user?.location || { lat: 12.9716, lng: 77.5946 }, // Default Bangalore
-                medicalHistory: user?.medicalHistory || [],
-                age: user?.age || 30,
-                gender: user?.gender || 'prefer-not-to-say'
-            };
-
-            // Simulate AI processing with enhanced matching
-            const mockDoctors = generateEnhancedDoctorRecommendations(analysisData);
-            
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            setRecommendedDoctors(mockDoctors);
-            
-            addToast({
-                type: "success",
-                title: "AI Analysis Complete",
-                message: `Found ${mockDoctors.length} highly matched doctors for your symptoms.`
+                patientId: user?.id
             });
             
+            if (response.data && response.data.success) {
+                const doctors = response.data.recommendations.map(d => ({
+                    id: d.id,
+                    name: d.fullName,
+                    specialization: d.specialty,
+                    experience: parseInt(d.experience) || 10,
+                    rating: 4.8,
+                    profileImage: `https://ui-avatars.com/api/?name=${encodeURIComponent(d.fullName)}&background=random`
+                }));
+                setRecommendedDoctors(doctors);
+                addToast({
+                    type: "success",
+                    title: "AI Analysis Complete",
+                    message: `Matched you with ${doctors.length} doctors specialized in ${response.data.specialty}.`
+                });
+            }
         } catch (error) {
-            console.error("AI mapping failed", error);
+            console.error("AI matching failed", error);
             addToast({
                 type: "error",
-                title: "Analysis Failed",
-                message: "Unable to process symptoms. Please try again."
+                title: "Inference Error",
+                message: "Could not process AI recommendation. Falling back to general search."
             });
         } finally {
             setLoading(false);
