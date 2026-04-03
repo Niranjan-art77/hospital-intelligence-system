@@ -8,11 +8,27 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const savedUser = localStorage.getItem("nova_user");
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
+        const checkSession = async () => {
+            const savedUser = localStorage.getItem("nova_user");
+            if (savedUser) {
+                try {
+                    const parsedUser = JSON.parse(savedUser);
+                    // Verify the session is still valid with a simple health check or user fetch
+                    const response = await API.get("/health").catch(() => null);
+                    if (response && response.status === 200) {
+                        setUser(parsedUser);
+                    } else {
+                        // Backend changed, clear stale session
+                        console.warn("Session stale, clearing...");
+                        logout();
+                    }
+                } catch (e) {
+                    logout();
+                }
+            }
+            setLoading(false);
+        };
+        checkSession();
     }, []);
 
     const login = async (email, password) => {

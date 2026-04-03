@@ -2,8 +2,8 @@ import { io } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
   (import.meta.env.PROD 
-    ? 'https://nova-health-ai-production.up.railway.app' 
-    : 'http://localhost:8080');
+    ? 'https://hospital-intelligence-system-2.onrender.com' 
+    : 'http://localhost:5000');
 
 class SocketService {
     constructor() {
