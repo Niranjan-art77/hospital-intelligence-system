@@ -34,11 +34,11 @@ def seed_data():
               (staff_id, 'staff@nova.com', pwd, 'Hospital Staff Alpha', 'STAFF'))
               
     # SAMPLE DATA FOR PATIENT (John Doe)
-    # Vitals (7 Days of History for Charts)
+    # Vitals (14 Days of History for Charts)
     vitals_data = []
-    for i in range(7):
+    for i in range(14):
         date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d %H:%M:%S')
-        vitals_data.append((pat_user_id, 70 + i, '120/80', 98.6, 98, date))
+        vitals_data.append((pat_user_id, 70 + (i % 5), '120/80', 98.6, 98, date))
     c.executemany("INSERT INTO vitals (patientId, heartRate, bloodPressure, temperature, oxygenLevel, recordedAt) VALUES (?, ?, ?, ?, ?, ?)", vitals_data)
     
     # Billing
