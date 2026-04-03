@@ -80,30 +80,7 @@ def init_db():
         )
     ''')
     
-    # Messages table (already exists in some form)
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender_id TEXT NOT NULL,
-            receiver_id TEXT NOT NULL,
-            content TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Reports table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            patient_id TEXT NOT NULL,
-            title TEXT NOT NULL,
-            type TEXT NOT NULL,
-            content_base64 TEXT NOT NULL,
-            date DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-
-    # Billing table
+    # Prescriptions table
     c.execute('''
         CREATE TABLE IF NOT EXISTS billing (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,6 +153,65 @@ def init_db():
             location_lat REAL,
             location_lng REAL,
             message TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Notifications table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT DEFAULT 'info',
+            isRead BOOLEAN DEFAULT 0,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Messages table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            senderId TEXT NOT NULL,
+            receiverId TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # AI Chat History table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS ai_chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Recovery Roadmap table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS recovery_roadmap (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patientId TEXT NOT NULL,
+            phase TEXT NOT NULL,
+            description TEXT,
+            status TEXT DEFAULT 'PENDING',
+            progress INTEGER DEFAULT 0,
+            targetDate TEXT
+        )
+    ''')
+
+    # Medication Logs table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS medication_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patientId TEXT NOT NULL,
+            medicineName TEXT NOT NULL,
+            status TEXT DEFAULT 'TAKEN',
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
