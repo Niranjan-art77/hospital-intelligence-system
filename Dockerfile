@@ -1,28 +1,34 @@
-# Stage 1: Build
-FROM eclipse-temurin:17-jdk-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN chmod +x mvnw
-RUN ./mvnw clean package -DskipTests
+# Use Python 3.11 slim image
+FROM python:3.11-slim
 
-# Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine AS runtime
+# Set working directory
 WORKDIR /app
 
-# Create and use a non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Install system dependencies (for building some python packages if needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the built JAR from the builder stage
-COPY --from=builder /app/target/hospital-intelligence-0.0.1-SNAPSHOT.jar app.jar
+# Copy the backend requirements first for caching
+COPY backend/requirements.txt .
 
-# Grant ownership of /app to appuser (fixes AccessDeniedException for H2 database)
-RUN chown -R appuser:appgroup /app
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-USER appuser
+# Copy the backend code
+COPY backend/ .
 
-# Port handling for Render
-ENV PORT=8080
+# Ensure the app user can write to the database
+RUN chmod 777 .
+
+# Initialize the database and seed it on every build/startup for testability
+# Note: In a production environment with persistent storage, you'd use migrations.
+RUN python -c "from utils.db import init_db; init_db()"
+RUN python seed.py
+
+# Expose the port (Render uses $PORT)
+ENV PORT=5000
 EXPOSE ${PORT}
 
-# Application launch with dynamic port and 0.0.0.0 binding
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -Dserver.address=0.0.0.0 -jar app.jar"]
+# Run the application with Gunicorn
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT} app:app"]
