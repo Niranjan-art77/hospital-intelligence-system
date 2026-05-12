@@ -25,35 +25,40 @@ class SocketService {
             this.socket = null;
         }
 
+        console.log(`[Socket] Connecting to ${SOCKET_URL}...`);
+
         this.socket = io(SOCKET_URL, {
             auth: { token },
             transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 2000,
-            reconnectionDelayMax: 10000,
+            reconnectionAttempts: Infinity, // Keep trying in production
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
             timeout: 20000,
-            forceNew: false
+            autoConnect: true
         });
 
         this.socket.on('connect', () => {
+            console.log('[Socket] Connected successfully');
             this.connected = true;
         });
 
         this.socket.on('disconnect', (reason) => {
+            console.warn(`[Socket] Disconnected: ${reason}`);
             this.connected = false;
-            // If server closed the connection, do NOT auto-reconnect
+            // If server closed the connection, manually reconnect
             if (reason === 'io server disconnect') {
                 this.socket.connect();
             }
         });
 
         this.socket.on('connect_error', (error) => {
+            console.error('[Socket] Connection error:', error.message);
             this.connected = false;
         });
 
-        this.socket.on('reconnect_failed', () => {
-            this.connected = false;
+        this.socket.on('reconnect_attempt', (attempt) => {
+            console.log(`[Socket] Reconnection attempt #${attempt}`);
         });
 
         return this.socket;

@@ -55,10 +55,19 @@ export default function MedicalReports() {
 
     const fetchReports = async () => {
         try {
+            setLoading(true);
             const res = await API.get(`/reports/patient/${user.id}`);
-            setReports(res.data);
+            // Defensive: ensure we set an array
+            const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+            setReports(data);
         } catch (error) {
             console.error("Failed to load reports", error);
+            addToast({
+                type: "error",
+                title: "Fetch Failed",
+                message: "Unable to retrieve medical records. Please try again."
+            });
+            setReports([]); // Fallback to empty state
         } finally {
             setLoading(false);
         }
@@ -223,18 +232,19 @@ export default function MedicalReports() {
         return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
     };
 
-    const filteredReports = reports
+    const filteredReports = (Array.isArray(reports) ? reports : [])
         .filter(report => {
+            if (!report) return false;
             const matchesSearch = report.reportName?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesType = filterType === 'all' || 
-                (filterType === 'pdf' && report.fileType?.includes('pdf')) ||
-                (filterType === 'image' && !report.fileType?.includes('pdf'));
+                (filterType === 'pdf' && report.fileType?.toLowerCase().includes('pdf')) ||
+                (filterType === 'image' && (report.fileType?.toLowerCase().includes('png') || report.fileType?.toLowerCase().includes('jpg') || report.fileType?.toLowerCase().includes('jpeg')));
             return matchesSearch && matchesType;
         })
         .sort((a, b) => {
-            if (sortBy === 'date') return new Date(b.createdAt) - new Date(a.createdAt);
-            if (sortBy === 'name') return a.reportName.localeCompare(b.reportName);
-            if (sortBy === 'size') return (b.fileSize || 0) - (a.fileSize || 0);
+            if (sortBy === 'date') return new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0);
+            if (sortBy === 'name') return (a?.reportName || "").localeCompare(b?.reportName || "");
+            if (sortBy === 'size') return (b?.fileSize || 0) - (a?.fileSize || 0);
             return 0;
         });
 

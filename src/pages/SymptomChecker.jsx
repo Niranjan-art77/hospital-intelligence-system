@@ -288,7 +288,7 @@ export default function SymptomChecker() {
                                         AI Probability Analysis
                                     </h3>
                                     <div className="space-y-5">
-                                        {result.conditions.map((cond, i) => {
+                                        {(Array.isArray(result.conditions) ? result.conditions : []).map((cond, i) => {
                                             const prob = i === 0 ? 88 : i === 1 ? 42 : 15; // Simulated probabilities
                                             const colors = prob > 70 ? "from-red-500 to-orange-500" : prob > 30 ? "from-yellow-500 to-orange-400" : "from-emerald-500 to-teal-400";
                                             return (
@@ -343,7 +343,7 @@ export default function SymptomChecker() {
                                             </div>
                                         </div>
                                         <ul className="space-y-3">
-                                            {result.conditions.map((cond, i) => (
+                                            {(Array.isArray(result.conditions) ? result.conditions : []).map((cond, i) => (
                                                 <li key={i} className="flex items-center gap-3 text-slate-200 font-bold bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
                                                     <span className="text-[#A855F7]">🧬</span> {cond}
                                                 </li>
@@ -359,7 +359,7 @@ export default function SymptomChecker() {
                                                 Recommended Actions
                                             </h3>
                                             <ul className="space-y-2 mb-6">
-                                                {result.precautions.map((prec, i) => (
+                                                {(Array.isArray(result.precautions) ? result.precautions : []).map((prec, i) => (
                                                     <li key={i} className="flex items-start gap-3 text-sm text-slate-300 font-medium">
                                                         <span className="text-[#10B981] mt-0.5">✓</span> {prec}
                                                     </li>
@@ -407,12 +407,12 @@ export default function SymptomChecker() {
                                             OTC Suggestions
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
-                                            {result.medicines.map((med, i) => (
+                                            {(Array.isArray(result.medicines) ? result.medicines : []).map((med, i) => (
                                                 <span key={i} className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2">
                                                     💊 {med}
                                                 </span>
                                             ))}
-                                            {result.medicines.length === 0 && <span className="text-slate-500 text-sm">No OTC medicines suggested.</span>}
+                                            {(Array.isArray(result.medicines) ? result.medicines.length : 0) === 0 && <span className="text-slate-500 text-sm">No OTC medicines suggested.</span>}
                                         </div>
                                     </div>
 
@@ -423,12 +423,12 @@ export default function SymptomChecker() {
                                             AI Follow-up
                                         </h3>
                                         <ul className="space-y-3">
-                                            {result.followUpQuestions.map((q, i) => (
+                                            {(Array.isArray(result.followUpQuestions) ? result.followUpQuestions : []).map((q, i) => (
                                                 <li key={i} className="bg-white/5 p-3 rounded-xl border border-white/10 text-sm font-medium text-slate-200">
                                                     <span className="font-bold text-[#EC4899] mr-2">Q:</span>{q}
                                                 </li>
                                             ))}
-                                            {result.followUpQuestions.length === 0 && <span className="text-slate-500 text-sm">No further questions.</span>}
+                                            {(Array.isArray(result.followUpQuestions) ? result.followUpQuestions.length : 0) === 0 && <span className="text-slate-500 text-sm">No further questions.</span>}
                                         </ul>
                                     </div>
                                 </div>

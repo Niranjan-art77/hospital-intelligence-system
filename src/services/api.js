@@ -37,25 +37,16 @@ API.interceptors.request.use((config) => {
 // Response Interceptor (Error Handling)
 API.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const message = error.response?.data?.message || error.message || "Network Synchronization Error";
-    
-    // Log structured error for debugging
-    console.error(`[API Error] ${error.config?.url}:`, {
-        status: error.response?.status,
-        message: message,
-        data: error.response?.data
-    });
-
-    // Handle session expiry (401)
-    if (error.response?.status === 401) {
-        // Potential logout logic here
-        console.warn("Unauthorized access - session might be expired");
+  async (error) => {
+    const { config, response } = error;
+    const shouldRetry = !response || (response.status >= 500 && response.status <= 504);
+    if (shouldRetry && (!config.__retryCount || config.__retryCount < 2)) {
+        config.__retryCount = (config.__retryCount || 0) + 1;
+        await new Promise(resolve => setTimeout(resolve, 1000 * config.__retryCount));
+        return API(config);
     }
-
-    // Attach human-readable message to error object
+    const message = response?.data?.message || error.message || "Network Synchronization Error";
     error.humanMessage = message;
-    
     return Promise.reject(error);
   }
 );

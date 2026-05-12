@@ -6,7 +6,7 @@ import {
     Check, CheckCheck, Clock, User, Circle, Search,
     Filter, Star, Archive, Trash2, Reply, Edit2,
     Forward, Info, Shield, Volume2, VolumeX, Settings,
-    Wifi, WifiOff, RefreshCw, X, ChevronLeft, Hash
+    Wifi, WifiOff, RefreshCw, X, ChevronLeft, Hash, Mail
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -194,134 +194,44 @@ export default function RealTimeChat({ doctorId, patientId, onClose }) {
     };
 
     const sendMessage = async (messageData = {}) => {
-        if ((!newMessage.trim() && !messageData.file && !audioURL) || sending) return;
+        if ((!newMessage.trim() && !messageData.fileUrl) || sending) return;
 
         setSending(true);
         const tempId = Date.now().toString();
         
         try {
-            let fileUrl = '';
-            let fileType = '';
-            let fileName = '';
-            
-            // Handle file upload
-            if (messageData.file || selectedFile) {
-                const fileToUpload = messageData.file || selectedFile;
-                const formData = new FormData();
-                formData.append('file', fileToUpload);
-                formData.append('roomId', roomId);
-                
-                const uploadResponse = await API.post('/chat/upload', formData, {
-                    onUploadProgress: (progressEvent) => {
-                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        setUploadProgress(progress);
-                    }
-                });
-                
-                fileUrl = uploadResponse.data.url;
-                fileType = uploadResponse.data.type;
-                fileName = uploadResponse.data.name;
-            }
-            
-            // Handle audio message
-            if (audioURL) {
-                const audioBlob = await fetch(audioURL).then(r => r.blob());
-                const formData = new FormData();
-                formData.append('audio', audioBlob, 'voice-message.mp3');
-                formData.append('roomId', roomId);
-                
-                const uploadResponse = await API.post('/chat/upload-audio', formData);
-                fileUrl = uploadResponse.data.url;
-                fileType = 'audio';
-                fileName = 'Voice Message';
-            }
-            
             const messagePayload = {
                 id: tempId,
                 roomId,
                 senderId: user.id,
-                receiverId: user.role === 'doctor' ? patientId : doctorId,
-                content: newMessage.trim(),
-                fileUrl,
-                fileType,
-                fileName,
-                replyTo: replyToMessage?.id,
-                timestamp: new Date().toISOString(),
-                status: 'sending'
-            };
-            
-            // Add temporary message to UI
-            setMessages(prev => [...prev, messagePayload]);
-            setMessageStatuses(prev => ({ ...prev, [tempId]: 'sending' }));
-            
-            // Send via socket
-            SocketService.sendMessage(messagePayload);
-            
-            // Clear inputs
-            setNewMessage('');
-            setReplyToMessage(null);
-            setSelectedFile(null);
-            setAudioURL('');
-            setUploadProgress(0);
-            
-            // Update status to sent
-            setTimeout(() => {
-                setMessageStatuses(prev => ({ ...prev, [tempId]: 'sent' }));
-                setMessages(prev => prev.map(msg => 
-                    msg.id === tempId ? { ...msg, status: 'sent' } : msg
-                ));
-            }, 500);
-            
-            // Update status to delivered
-            setTimeout(() => {
-                setMessageStatuses(prev => ({ ...prev, [tempId]: 'delivered' }));
-                setMessages(prev => prev.map(msg => 
-                    msg.id === tempId ? { ...msg, status: 'delivered' } : msg
-                ));
-            }, 1000);
-            
-        } catch (error) {
-            console.error('Failed to send message:', error);
-            addToast({
-                type: 'error',
-                title: 'Message Failed',
-                message: 'Unable to send message. Please try again.'
-            });
-            
-            // Remove failed message
-            setMessages(prev => prev.filter(msg => msg.id !== tempId));
-            setMessageStatuses(prev => {
-                const newStatuses = { ...prev };
-                delete newStatuses[tempId];
-                return newStatuses;
-            });
-        } finally {
-            setSending(false);
-        }
-    };
-        
-        try {
-            const message = {
-                roomId,
-                senderId: user.id,
-                content: newMessage.trim(),
+                receiverId: user.role === 'DOCTOR' ? patientId : doctorId,
+                content: messageData.content || newMessage.trim(),
                 type: messageData.type || 'text',
                 fileUrl: messageData.fileUrl || null,
                 fileName: messageData.fileName || null,
                 fileSize: messageData.fileSize || null,
                 timestamp: new Date().toISOString(),
-                read: false
+                status: 'sending'
             };
-
-            // Send via socket for real-time delivery
-            SocketService.sendMessage(message);
+            
+            // Add temporary message to UI for instant feedback
+            setMessages(prev => [...prev, messagePayload]);
+            
+            // Send via socket
+            SocketService.sendMessage(messagePayload);
             
             // Also save to database
-            await API.post('/messages', message);
+            await API.post('/messages', messagePayload);
             
+            // Clear inputs
             setNewMessage('');
             setTyping(false);
             scrollToBottom();
+            
+            // Update status to sent
+            setMessages(prev => prev.map(msg => 
+                msg.id === tempId ? { ...msg, status: 'sent' } : msg
+            ));
             
         } catch (error) {
             console.error('Failed to send message:', error);
@@ -330,6 +240,10 @@ export default function RealTimeChat({ doctorId, patientId, onClose }) {
                 title: 'Send Failed',
                 message: 'Failed to send message. Please try again.'
             });
+            // Mark as failed in UI
+            setMessages(prev => prev.map(msg => 
+                msg.id === tempId ? { ...msg, status: 'error' } : msg
+            ));
         } finally {
             setSending(false);
         }

@@ -1,10 +1,14 @@
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
+    
+    # Initialize SocketIO
+    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
     @app.route('/', methods=['GET'])
     def index():
@@ -65,14 +69,45 @@ def create_app():
     def resource_not_found(e):
         return jsonify(error=str(e), message="Route not found on Flask backend. May not be migrated yet."), 404
 
+    # SocketIO Handlers
+    @socketio.on('connect')
+    def handle_connect():
+        print('Client connected:', request.sid)
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        print('Client disconnected:', request.sid)
+
+    @socketio.on('join-room')
+    def on_join(room):
+        join_room(room)
+        print(f'User joined room: {room}')
+
+    @socketio.on('leave-room')
+    def on_leave(room):
+        leave_room(room)
+        print(f'User left room: {room}')
+
+    @socketio.on('send-message')
+    def handle_send_message(data):
+        room = data.get('roomId')
+        emit('new-message', data, room=room)
+        print(f'Message sent to room {room}: {data.get("content")}')
+
+    @socketio.on('typing')
+    def handle_typing(data):
+        room = data.get('roomId')
+        emit('user-typing', data, room=room, include_self=False)
+
     # Initialize database
     from utils.db import init_db
     init_db()
 
-    return app
+    return app, socketio
 
-app = create_app()
+app, socketio = create_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # Use socketio.run instead of app.run
+    socketio.run(app, host="0.0.0.0", port=port, debug=True)
