@@ -3,6 +3,51 @@ from utils.db import get_db_connection
 
 patients_bp = Blueprint('patients', __name__)
 
+@patients_bp.route('/', methods=['GET'])
+def get_all_patients():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE role = "PATIENT"')
+    patients = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify(patients)
+
+@patients_bp.route('/<int:patient_id>', methods=['GET'])
+def get_patient(patient_id):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE id = ?', (patient_id,))
+    patient = c.fetchone()
+    conn.close()
+    if patient:
+        return jsonify({"success": True, "data": dict(patient)})
+    return jsonify({"success": False, "message": "Patient not found"}), 404
+
+@patients_bp.route('/<int:patient_id>', methods=['PUT'])
+def update_patient(patient_id):
+    data = request.json
+    name = data.get('name')
+    age = data.get('age')
+    bloodGroup = data.get('bloodGroup')
+    allergies = data.get('allergies')
+    chronicConditions = data.get('chronicConditions')
+    insuranceProvider = data.get('insuranceProvider')
+    photoUrl = data.get('photoUrl')
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''
+        UPDATE users 
+        SET fullName = ?, age = ?, bloodGroup = ?, allergies = ?, chronicConditions = ?, insuranceProvider = ?, photoUrl = ?
+        WHERE id = ?
+    ''', (name, age, bloodGroup, allergies, chronicConditions, insuranceProvider, photoUrl, patient_id))
+    conn.commit()
+    
+    c.execute('SELECT * FROM users WHERE id = ?', (patient_id,))
+    patient = c.fetchone()
+    conn.close()
+    return jsonify({"success": True, "data": dict(patient)})
+
 @patients_bp.route('/<patient_id>/vitals', methods=['GET'])
 def get_vitals(patient_id):
     conn = get_db_connection()
@@ -109,3 +154,12 @@ def get_patient_stats(patient_id):
     }
     conn.close()
     return jsonify({"success": True, "data": stats})
+
+@patients_bp.route('/<patient_id>/emergency-contacts', methods=['GET'])
+def get_patient_emergency_contacts(patient_id):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM emergency_contacts WHERE patientId = ?', (patient_id,))
+    contacts = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify({"success": True, "data": contacts})

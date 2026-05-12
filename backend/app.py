@@ -26,6 +26,7 @@ def create_app():
     from routes.ai import ai_bp
     from routes.reports import reports_bp
     from routes.notifications import notifications_bp
+    from routes.analytics import analytics_bp
 
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
     app.register_blueprint(messages_bp, url_prefix='/api/messages')
@@ -38,6 +39,7 @@ def create_app():
     app.register_blueprint(prescriptions_bp, url_prefix='/api/prescriptions')
     app.register_blueprint(emergency_bp, url_prefix='/api/emergency')
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+    app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
     
     # Special routes to match frontend expectations exactly
     @app.route('/api/hospitals/nearby', methods=['GET'])

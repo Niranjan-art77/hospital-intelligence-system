@@ -3,6 +3,21 @@ from utils.db import get_db_connection
 
 appointments_bp = Blueprint('appointments', __name__)
 
+@appointments_bp.route('/', methods=['GET'])
+def get_all_appointments():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT a.*, p.fullName as patientName, d.fullName as doctorName 
+        FROM appointments a 
+        JOIN users p ON a.patientId = p.id 
+        JOIN users d ON a.doctorId = d.id 
+        ORDER BY a.appointmentTime ASC
+    ''')
+    appointments = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify(appointments)
+
 @appointments_bp.route('/patient/<patient_id>', methods=['GET'])
 def get_patient_appointments(patient_id):
     conn = get_db_connection()
