@@ -25,7 +25,7 @@ import PharmacyDashboard from "./pages/pharmacy/PharmacyDashboard";
 
 // Doctor pages
 import DoctorLayout from "./layouts/DoctorLayout";
-import DoctorCommandCenter from "./pages/doctor/DoctorCommandCenter";
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import PrescriptionManager from "./pages/doctor/PrescriptionManager";
@@ -113,7 +113,7 @@ export default function App() {
             <DoctorLayout />
           </RoleRoute>
         }>
-          <Route index element={<DoctorCommandCenter />} />
+          <Route index element={<DoctorDashboard />} />
           <Route path="patients" element={<DoctorPatients />} />
           <Route path="appointments" element={<DoctorAppointments />} />
           <Route path="prescriptions" element={<PrescriptionManager />} />
