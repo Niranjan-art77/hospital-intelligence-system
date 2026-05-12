@@ -320,6 +320,7 @@ export default function PrescriptionManager() {
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
             
             {/* Scanline Effect */}
