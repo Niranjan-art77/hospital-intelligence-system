@@ -98,7 +98,16 @@ export default function PatientDashboard() {
             setAppointmentStats(Object.values(statsMap).slice(-6));
 
             setBillingInfo(Array.isArray(billRes.data) ? billRes.data : []);
-            setTimeline(Array.isArray(timelineRes.data) ? timelineRes.data.slice(0, 4) : []);
+            const timelineRaw = Array.isArray(timelineRes.data) ? timelineRes.data : [];
+            const mappedTimeline = timelineRaw.slice(0, 4).map((e) => ({
+                date: e?.timestamp ? new Date(e.timestamp).toLocaleDateString() : "",
+                title: e?.title || "",
+                type: e?.eventType || "",
+                doctor: e?.doctorName || "",
+                description: e?.description || "",
+                sortDate: e?.timestamp ? new Date(e.timestamp) : null,
+            }));
+            setTimeline(mappedTimeline);
 
             if (vitalsRes.data && vitalsRes.data.length > 0) {
                 const mappedVitals = vitalsRes.data.map(v => {
@@ -618,7 +627,7 @@ export default function PatientDashboard() {
                                     <div key={bill.id} className="flex items-center justify-between p-4 bg-red-500/5 border border-red-500/10 rounded-2xl">
                                         <div>
                                             <p className="text-xs font-bold text-white">Pending Invoice</p>
-                                            <p className="text-xl font-black text-red-400">₹{bill.amount}</p>
+                                            <p className="text-xl font-black text-red-400">₹{bill.totalAmount ?? bill.amount ?? 0}</p>
                                         </div>
                                         <button onClick={() => handlePayBill(bill.id, 'UPI')} className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Pay</button>
                                     </div>

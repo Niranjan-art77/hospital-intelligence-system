@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Outlet, useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import MedicalChatbot from "../components/MedicalChatbot";
+import Chatbot from "../components/Chatbot";
 import "./PatientLayout.css";
 
 const navItems = [
@@ -18,13 +19,17 @@ const navItems = [
     { to: "/patient/recovery", icon: "🧗", label: "Recovery Roadmap" },
     { to: "/patient/billing", icon: "💳", label: "Billing & Invoices" },
     { to: "/patient/symptom-checker", icon: "🤖", label: "Symptom AI" },
-    { to: "/patient/emergency", icon: "🚨", label: "SOS Emergency", special: true },
 ];
 
 export default function PatientLayout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const { addToast } = useToast();
+
+    const [search, setSearch] = useState("");
+    const filteredNav = navItems.filter(item => 
+        item.label.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div className="patient-layout">
@@ -41,13 +46,15 @@ export default function PatientLayout() {
                         <input
                             type="text"
                             placeholder="Search Nova AI..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                             style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "8px 12px 8px 32px", fontSize: "0.75rem", color: "white", outline: "none" }}
                         />
                         <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "0.8rem", opacity: 0.5 }}>🔍</span>
                     </div>
                 </div>
                 <nav className="psidebar-nav">
-                    {navItems.map(({ to, icon, label, end, special }) => (
+                    {filteredNav.map(({ to, icon, label, end, special }) => (
                         <NavLink 
                             key={to} 
                             to={to} 
@@ -64,6 +71,7 @@ export default function PatientLayout() {
                             <span>{icon}</span><span>{label}</span>
                         </NavLink>
                     ))}
+                    {filteredNav.length === 0 && <div style={{ padding: "20px", color: "#64748b", fontSize: "0.8rem", textAlign: "center" }}>No features found</div>}
                 </nav>
                 <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <button
@@ -94,7 +102,7 @@ export default function PatientLayout() {
             </aside>
             <main className="patient-content">
                 <Outlet />
-                <MedicalChatbot />
+                <Chatbot />
             </main>
         </div>
     );

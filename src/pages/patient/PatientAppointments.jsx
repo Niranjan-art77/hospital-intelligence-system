@@ -712,7 +712,7 @@ export default function PatientAppointments() {
                 .shadow-glow-sm {
                     box-shadow: 0 0 10px currentColor;
                 }
-                .xxl\:grid-cols-3 {
+                .xxl\\:grid-cols-3 {
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
             `}</style>

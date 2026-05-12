@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Outlet, useNavigate, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -18,6 +19,11 @@ export default function DoctorLayout() {
     const navigate = useNavigate();
     const { addToast } = useToast();
 
+    const [search, setSearch] = useState("");
+    const filteredNav = navItems.filter(item => 
+        item.label.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <div className="doctor-layout">
             <aside className="doctor-sidebar">
@@ -33,17 +39,20 @@ export default function DoctorLayout() {
                         <input
                             type="text"
                             placeholder="Search Records..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                             style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "8px 12px 8px 32px", fontSize: "0.75rem", color: "white", outline: "none" }}
                         />
                         <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "0.8rem", opacity: 0.5 }}>🔍</span>
                     </div>
                 </div>
                 <nav className="dsidebar-nav">
-                    {navItems.map(({ to, icon, label, end }) => (
+                    {filteredNav.map(({ to, icon, label, end }) => (
                         <NavLink key={to} to={to} end={end} className={({ isActive }) => `dnav-item ${isActive ? "active" : ""}`}>
                             <span>{icon}</span><span>{label}</span>
                         </NavLink>
                     ))}
+                    {filteredNav.length === 0 && <div style={{ padding: "20px", color: "#64748b", fontSize: "0.8rem", textAlign: "center" }}>No features found</div>}
                 </nav>
                 <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                     <button

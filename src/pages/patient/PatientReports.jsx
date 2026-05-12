@@ -113,19 +113,14 @@ export default function MedicalReports() {
 
             setStatus({ type: "info", message: "Cloud sync successful. Registering with medical database..." });
 
-            const reportData = {
-                reportName: reportName,
-                fileUrl: cloudinaryData.url,
-                fileType: file.type,
-                fileSize: cloudinaryData.size,
-                publicId: cloudinaryData.publicId,
-                format: cloudinaryData.format,
-                resourceType: cloudinaryData.resourceType,
-                patientId: user.id,
-                uploadDate: new Date().toISOString()
-            };
+            const formData = new FormData();
+            formData.append("reportName", reportName);
+            formData.append("fileUrl", cloudinaryData.url);
+            formData.append("fileType", cloudinaryData.format || file.type || "");
 
-            const response = await API.post(`/reports/upload/${user.id}`, reportData);
+            const response = await API.post(`/reports/upload/${user.id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
 
             setStatus({ type: "success", message: "Intelligence commitment successful. Vault updated." });
             addToast({
@@ -593,7 +588,7 @@ export default function MedicalReports() {
                 .shadow-glow-purple {
                     box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
                 }
-                .xxl\:grid-cols-3 {
+                .xxl\\:grid-cols-3 {
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
             `}</style>

@@ -27,7 +27,7 @@ export default function ReportView() {
     const [editing, setEditing] = useState(false);
     const [notes, setNotes] = useState('');
     const [showShareModal, setShowShareModal] = useState(false);
-    const [patientHistory, setPatientHistory] = useState([]);
+    const [patientHistory, setPatientHistory] = useState(null);
     const [prescriptions, setPrescriptions] = useState([]);
     const [allergies, setAllergies] = useState([]);
 
@@ -40,17 +40,23 @@ export default function ReportView() {
 
     const fetchPatientMedicalData = async () => {
         try {
-            // Fetch patient medical history
-            const historyResponse = await API.get(`/medical-history/${user?.id}`);
-            setPatientHistory(historyResponse.data || []);
+            // Fetch unified patient history bundle
+            const historyResponse = await API.get(`/patients/${user?.id}/history`);
+            setPatientHistory(historyResponse.data || null);
             
             // Fetch prescriptions
             const prescriptionsResponse = await API.get(`/prescriptions/patient/${user?.id}`);
             setPrescriptions(prescriptionsResponse.data || []);
             
-            // Fetch allergies
-            const allergiesResponse = await API.get(`/patients/${user?.id}/allergies`);
-            setAllergies(allergiesResponse.data || []);
+            // Fetch patient profile (allergies, etc.)
+            const patientRes = await API.get(`/patients/${user?.id}`);
+            const rawAllergies = patientRes.data?.allergies;
+            const parsed = Array.isArray(rawAllergies)
+                ? rawAllergies
+                : typeof rawAllergies === "string"
+                ? rawAllergies.split(",").map(s => s.trim()).filter(Boolean)
+                : [];
+            setAllergies(parsed);
         } catch (error) {
             console.error('Failed to fetch medical data:', error);
         }
@@ -59,9 +65,15 @@ export default function ReportView() {
     const fetchReportDetails = async () => {
         try {
             setLoading(true);
-            const response = await API.get(`/reports/${reportId}`);
-            setReport(response.data);
-            setNotes(response.data.notes || '');
+            // Backend exposes reports by patient; fetch and select by id
+            const response = await API.get(`/reports/patient/${user?.id}`);
+            const list = Array.isArray(response.data) ? response.data : [];
+            const found = list.find(r => String(r.id) === String(reportId));
+            if (!found) {
+                throw new Error("Report not found");
+            }
+            setReport(found);
+            setNotes(found.notes || '');
         } catch (error) {
             console.error('Failed to fetch report details:', error);
             addToast({
@@ -78,6 +90,14 @@ export default function ReportView() {
         setDownloading(true);
         try {
             const pdf = new jsPDF();
+            let currentY = 50;
+            const checkPageBreak = (y) => {
+                if (y > 275) {
+                    pdf.addPage();
+                    return 20;
+                }
+                return y;
+            };
             
             // Add custom font for better rendering
             pdf.setFont('helvetica');
@@ -101,8 +121,8 @@ export default function ReportView() {
             
             pdf.setFontSize(11);
             pdf.setFont('helvetica', 'normal');
-            currentY += 10;
-            pdf.text(`Name: ${user?.name || 'N/A'}`, 25, currentY);
+            currentY = 70;
+            pdf.text(`Name: ${user?.fullName || user?.name || 'N/A'}`, 25, currentY);
             currentY += 8;
             pdf.text(`Age: ${user?.age || 'N/A'}`, 25, currentY);
             currentY += 8;
@@ -110,7 +130,7 @@ export default function ReportView() {
             currentY += 8;
             pdf.text(`Blood Group: ${user?.bloodGroup || 'N/A'}`, 25, currentY);
             currentY += 8;
-            pdf.text(`Contact: ${user?.phone || 'N/A'}`, 25, currentY);
+            pdf.text(`Contact: ${user?.phone || user?.email || 'N/A'}`, 25, currentY);
             
             // Report Details
             currentY = checkPageBreak(currentY + 20);
@@ -123,7 +143,7 @@ export default function ReportView() {
             pdf.setFont('helvetica', 'normal');
             pdf.text(`Report Name: ${report?.reportName || 'N/A'}`, 25, currentY);
             currentY += 8;
-            pdf.text(`Date: ${new Date(report?.uploadDate).toLocaleDateString()}`, 25, currentY);
+            pdf.text(`Date: ${new Date(report?.createdAt || report?.uploadDate || Date.now()).toLocaleDateString()}`, 25, currentY);
             currentY += 8;
             pdf.text(`Doctor: ${report?.doctorName || 'N/A'}`, 25, currentY);
             
@@ -167,12 +187,14 @@ export default function ReportView() {
                 pdf.setFont('helvetica', 'bold');
                 pdf.text('Current Medications', 20, currentY);
                 
-                const medicationData = prescriptions.map(med => [
-                    med.medicineName || med.name || 'N/A',
-                    med.dosage || 'N/A',
-                    med.frequency || 'N/A',
-                    med.duration || 'N/A'
-                ]);
+                const medicationData = prescriptions
+                    .flatMap((rx) => (rx.items || []).map((it) => [
+                        it.medicineName || "N/A",
+                        it.dosage || "N/A",
+                        `${it.morning ? "M " : ""}${it.afternoon ? "A " : ""}${it.night ? "N" : ""}`.trim() || "N/A",
+                        it.days != null ? String(it.days) : "N/A",
+                    ]))
+                    .slice(0, 12);
                 
                 pdf.autoTable({
                     startY: currentY + 10,
@@ -195,8 +217,8 @@ export default function ReportView() {
                 currentY += 10;
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica', 'normal');
-                allergies.forEach((allergy, index) => {
-                    pdf.text(`• ${allergy.allergen || allergy.name}: ${allergy.reaction || 'Allergic reaction'}`, 25, currentY);
+                allergies.forEach((allergy) => {
+                    pdf.text(`• ${allergy}`, 25, currentY);
                     currentY += 8;
                 });
             }

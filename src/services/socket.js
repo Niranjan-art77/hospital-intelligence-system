@@ -37,12 +37,10 @@ class SocketService {
         });
 
         this.socket.on('connect', () => {
-            console.log('✅ Socket connected:', this.socket.id);
             this.connected = true;
         });
 
         this.socket.on('disconnect', (reason) => {
-            console.warn('⚠️ Socket disconnected. Reason:', reason);
             this.connected = false;
             // If server closed the connection, do NOT auto-reconnect
             if (reason === 'io server disconnect') {
@@ -51,12 +49,10 @@ class SocketService {
         });
 
         this.socket.on('connect_error', (error) => {
-            console.warn('⚠️ Socket connection failed:', error.message);
             this.connected = false;
         });
 
         this.socket.on('reconnect_failed', () => {
-            console.warn('⚠️ Socket reconnection failed after max attempts. Giving up.');
             this.connected = false;
         });
 

@@ -19,7 +19,7 @@ export default function BillingPage() {
     const fetchApprovedPrescriptions = async () => {
         try {
             // Reusing the get by patient API, then filtering APPROVED
-            const res = await API.get(`/prescriptions/${user?.id || 1}`);
+            const res = await API.get(`/prescriptions/patient/${user?.id || 1}`);
             const data = Array.isArray(res.data) ? res.data : [];
             setPrescriptions(data.filter(p => p.status === "APPROVED"));
         } catch (error) {

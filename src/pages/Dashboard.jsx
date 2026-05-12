@@ -89,7 +89,7 @@ export default function Dashboard() {
         });
         return newData;
       });
-    }, 2000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -165,7 +165,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-[11px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-300 transition-colors">{m.title}</p>
-            <h4 className="text-3xl font-black text-white mt-1">{m.val}</h4>
+            <h4 className="text-3xl font-black text-white mt-1">{m.val ?? "..."}</h4>
           </motion.div>
         ))}
       </div>

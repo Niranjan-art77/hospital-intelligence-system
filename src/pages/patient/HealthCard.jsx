@@ -48,7 +48,7 @@ export default function HealthCard() {
                 setVitals(prev => ({ ...prev, ...res.data.vitals }));
             }
         } catch (error) {
-            console.error("Failed to load patient info", error);
+            // Failed to load patient info silently or handled by UI
         } finally {
             setLoading(false);
         }
@@ -62,7 +62,7 @@ export default function HealthCard() {
                 { name: "Dr. Michael Chen", relation: "Primary Care", phone: "+1-555-0456" }
             ]);
         } catch (error) {
-            console.error("Failed to load emergency contacts", error);
+            // Failed to load emergency contacts
         }
     };
 
@@ -110,7 +110,7 @@ export default function HealthCard() {
                 setVitals(prev => ({ ...prev, bloodType: res.data.bloodGroup, allergies: res.data.allergies, conditions: res.data.chronicConditions }));
             }
         } catch (error) {
-            console.error(error);
+            // Handle error in UI
             addToast({ type: "error", title: "Update Failed", message: "Could not update profile." });
         }
     };
@@ -176,7 +176,7 @@ export default function HealthCard() {
                     url: `${window.location.origin}/health-card/${user?.id}`
                 });
             } catch (error) {
-                console.log('Share cancelled');
+                // Share cancelled silently
             }
         } else {
             navigator.clipboard.writeText(JSON.stringify(cardData, null, 2));

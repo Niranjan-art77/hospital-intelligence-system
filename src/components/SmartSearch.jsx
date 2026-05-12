@@ -59,7 +59,7 @@ export default function SmartSearch() {
             setRecentSearches(recentRes.data || generateMockRecentSearches());
             setBookmarks(bookmarksRes.data || []);
         } catch (error) {
-            console.error('Failed to fetch initial search data:', error);
+            // Search data fetch failed
             setTrendingSearches(generateMockTrendingSearches());
             setRecentSearches(generateMockRecentSearches());
         }
@@ -101,7 +101,7 @@ export default function SmartSearch() {
             };
 
             recognitionRef.current.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
+                // Voice search error
                 setIsListening(false);
                 addToast({
                     type: 'error',
@@ -145,8 +145,8 @@ export default function SmartSearch() {
             };
             setRecentSearches(prev => [newSearch, ...prev.slice(0, 9)]);
             
-            // Log search for analytics
-            API.post('/search/log', searchData).catch(console.error);
+            // Post search log
+            API.post('/search/log', searchData).catch(() => {});
             
         } catch (error) {
             console.error('Search failed:', error);
