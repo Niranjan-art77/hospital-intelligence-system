@@ -16,8 +16,12 @@ def get_rooms(userId):
         WHERE a.patientId = ?
     ''', (userId,))
     rooms = [dict(row) for row in c.fetchall()]
+    # Map participants for frontend if needed (not strictly required here but good for consistency)
+    for r in rooms:
+        r['participantName'] = r['fullName']
+        r['participantId'] = r['id']
     conn.close()
-    return jsonify({"success": True, "data": rooms})
+    return jsonify(rooms)
 
 @messages_bp.route('/history/<senderId>/<receiverId>', methods=['GET'])
 def get_history(senderId, receiverId):
@@ -30,7 +34,7 @@ def get_history(senderId, receiverId):
     ''', (senderId, receiverId, receiverId, senderId))
     history = [dict(row) for row in c.fetchall()]
     conn.close()
-    return jsonify({"success": True, "data": history})
+    return jsonify(history)
 
 @messages_bp.route('/send', methods=['POST'])
 def send_message():

@@ -227,6 +227,32 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Pharmacy table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS pharmacy (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            medicineName TEXT NOT NULL,
+            stock INTEGER DEFAULT 0,
+            price REAL DEFAULT 0.0,
+            description TEXT,
+            status TEXT DEFAULT 'In Stock',
+            lowStockThreshold INTEGER DEFAULT 100,
+            expiryDate TEXT
+        )
+    ''')
+    
+    # Insights table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS insights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patientId TEXT NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (patientId) REFERENCES users (id)
+        )
+    ''')
 
     conn.commit()
     conn.close()

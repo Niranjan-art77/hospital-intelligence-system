@@ -19,17 +19,37 @@ def get_recent_prescriptions(patient_id):
     prescriptions = []
     for p_row in c.fetchall():
         p = dict(p_row)
+        p['doctor'] = {"name": p['doctorName']}
         # Fetch items for each prescription
         c.execute('SELECT * FROM prescriptions_items WHERE prescriptionId = ?', (p['id'],))
         p['items'] = [dict(item) for item in c.fetchall()]
         prescriptions.append(p)
         
     conn.close()
+    return jsonify(prescriptions)
+
+@prescriptions_bp.route('/patient/<patient_id>', methods=['GET'])
+def get_patient_prescriptions(patient_id):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT p.*, u.fullName as doctorName 
+        FROM prescriptions p 
+        JOIN users u ON p.doctorId = u.id 
+        WHERE p.patientId = ? 
+        ORDER BY p.createdAt DESC
+    ''', (patient_id,))
     
-    return jsonify({
-        "success": True,
-        "data": prescriptions
-    })
+    prescriptions = []
+    for p_row in c.fetchall():
+        p = dict(p_row)
+        p['doctor'] = {"name": p['doctorName']}
+        c.execute('SELECT * FROM prescriptions_items WHERE prescriptionId = ?', (p['id'],))
+        p['items'] = [dict(item) for item in c.fetchall()]
+        prescriptions.append(p)
+        
+    conn.close()
+    return jsonify(prescriptions)
 
 @prescriptions_bp.route('/add', methods=['POST'])
 def add_prescription():

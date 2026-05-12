@@ -38,13 +38,14 @@ export default function Pharmacy() {
         }
     };
 
-    const totalUnits = medicines.reduce((acc, curr) => acc + curr.stock, 0);
-    const totalValue = medicines.reduce((acc, curr) => acc + (curr.stock * curr.price), 0);
-    const lowStockCount = medicines.filter(m => m.status === 'LOW STOCK' || m.status === 'Low Stock' || (m.stock < (m.lowStockThreshold || 100))).length;
-    const outOfStockCount = medicines.filter(m => m.status === 'OUT OF STOCK' || m.status === 'Out of Stock' || m.stock === 0).length;
+    const medicinesArray = Array.isArray(medicines) ? medicines : [];
+    const totalUnits = medicinesArray.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+    const totalValue = medicinesArray.reduce((acc, curr) => acc + ((curr.stock || 0) * (curr.price || 0)), 0);
+    const lowStockCount = medicinesArray.filter(m => m.status === 'LOW STOCK' || m.status === 'Low Stock' || ((m.stock || 0) < (m.lowStockThreshold || 100))).length;
+    const outOfStockCount = medicinesArray.filter(m => m.status === 'OUT OF STOCK' || m.status === 'Out of Stock' || (m.stock || 0) === 0).length;
 
     const today = new Date();
-    const expiringSoon = medicines.filter(m => {
+    const expiringSoon = medicinesArray.filter(m => {
         if (!m.expiryDate) return false;
         const exp = new Date(m.expiryDate);
         const diff = (exp - today) / (1000 * 60 * 60 * 24);
@@ -53,7 +54,7 @@ export default function Pharmacy() {
 
     const criticalAlerts = [
         ...expiringSoon.map(m => ({ type: 'EXPIRY', msg: `${m.medicineName} expires in ${Math.ceil((new Date(m.expiryDate) - today) / (1000 * 60 * 60 * 24))} days!`, color: '#EC4899' })),
-        ...medicines.filter(m => m.stock < (m.lowStockThreshold / 2) && m.stock > 0).map(m => ({ type: 'STOCK', msg: `Critical low stock: ${m.medicineName} (${m.stock} units)`, color: '#F59E0B' }))
+        ...medicinesArray.filter(m => (m.stock || 0) < ((m.lowStockThreshold || 100) / 2) && (m.stock || 0) > 0).map(m => ({ type: 'STOCK', msg: `Critical low stock: ${m.medicineName} (${m.stock} units)`, color: '#F59E0B' }))
     ];
 
     return (
@@ -70,7 +71,7 @@ export default function Pharmacy() {
                             Dispensary
                         </h1>
                         <p className="text-slate-400 font-medium text-sm mt-1">
-                            {medicines.length} medicines &nbsp;·&nbsp; {totalUnits.toLocaleString()} total units &nbsp;·&nbsp; <span className="text-[#EC4899] font-bold">{expiringSoon.length} expiring soon</span>
+                            {medicinesArray.length} medicines &nbsp;·&nbsp; {totalUnits.toLocaleString()} total units &nbsp;·&nbsp; <span className="text-[#EC4899] font-bold">{expiringSoon.length} expiring soon</span>
                         </p>
                     </div>
                 </div>
@@ -110,7 +111,7 @@ export default function Pharmacy() {
                             <BoxIcon />
                         </div>
                         <div>
-                            <div className="text-3xl font-black text-white group-hover:text-[#0EA5E9] transition-colors">{medicines.length}</div>
+                            <div className="text-3xl font-black text-white group-hover:text-[#0EA5E9] transition-colors">{medicinesArray.length}</div>
                             <div className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Total Medicines</div>
                         </div>
                     </div>
@@ -191,7 +192,7 @@ export default function Pharmacy() {
             {/* Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                 <AnimatePresence>
-                    {medicines.map((m, i) => {
+                    {medicinesArray.map((m, i) => {
                         const isOutOfStock = m.status === 'OUT OF STOCK';
                         const isLowStock = m.status === 'LOW STOCK';
                         return (

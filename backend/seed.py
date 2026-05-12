@@ -1,9 +1,10 @@
 import uuid
 from werkzeug.security import generate_password_hash
-from utils.db import get_db_connection
+from utils.db import get_db_connection, init_db
 from datetime import datetime, timedelta
 
 def seed_data():
+    init_db()
     conn = get_db_connection()
     c = conn.cursor()
     
@@ -99,6 +100,23 @@ def seed_data():
     
     hospitals = [('City General Hospital', 12.9716, 77.5946, '2.3 km', '+1-555-1001', '123 Main St', 1)]
     c.executemany("INSERT INTO hospitals (name, lat, lng, distance, phone, address, emergency) VALUES (?, ?, ?, ?, ?, ?, ?)", hospitals)
+    
+    # 5. PHARMACY
+    pharmacy_items = [
+        ('Amoxicillin 500mg', 1200, 15.50, 'Broad-spectrum antibiotic', 'In Stock', 100, '2025-12-01'),
+        ('Atorvastatin 20mg', 80, 24.00, 'Cholesterol medication', 'Low Stock', 100, '2025-11-15'),
+        ('Lisinopril 10mg', 0, 18.25, 'Blood pressure medication', 'Out of Stock', 50, '2025-10-20'),
+        ('Metformin 850mg', 450, 12.00, 'Diabetes medication', 'In Stock', 100, '2026-01-10'),
+        ('Aspirin 81mg', 15, 5.50, 'Pain reliever / Blood thinner', 'Low Stock', 50, '2025-06-01')
+    ]
+    c.executemany("INSERT INTO pharmacy (medicineName, stock, price, description, status, lowStockThreshold, expiryDate) VALUES (?, ?, ?, ?, ?, ?, ?)", pharmacy_items)
+    
+    # 6. INSIGHTS
+    insights_data = [
+        (pat_user_id, 'CRITICAL', 'Patient showing abnormal heart rate variability in the last 2 hours. Recommend immediate ECG.'),
+        (pat_user_id, 'OPTIMAL', 'Recovery roadmap for surgery recovery is ahead of schedule. Physiotherapy intensity can be increased.')
+    ]
+    c.executemany("INSERT INTO insights (patientId, type, message) VALUES (?, ?, ?)", insights_data)
 
     conn.commit()
     conn.close()

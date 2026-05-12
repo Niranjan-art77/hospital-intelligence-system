@@ -8,9 +8,39 @@ def get_all_patients():
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM users WHERE role = "PATIENT"')
-    patients = [dict(row) for row in c.fetchall()]
+    rows = c.fetchall()
+    patients = []
+    for row in rows:
+        p = dict(row)
+        p['name'] = row['fullName']
+        patients.append(p)
     conn.close()
     return jsonify(patients)
+
+@patients_bp.route('/', methods=['POST'])
+def add_patient():
+    import uuid
+    from werkzeug.security import generate_password_hash
+    data = request.json
+    name = data.get('name')
+    age = data.get('age')
+    bloodGroup = data.get('bloodGroup')
+    chronicConditions = data.get('chronicConditions')
+    
+    patient_id = str(uuid.uuid4())
+    # Default password for new patients
+    pwd = generate_password_hash('password123')
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO users (id, email, password, fullName, role, age, bloodGroup, chronicConditions) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (patient_id, f"{name.lower().replace(' ', '')}@nova.com", pwd, name, 'PATIENT', age, bloodGroup, chronicConditions))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"success": True, "id": patient_id, "message": "Patient created"}), 201
 
 @patients_bp.route('/<int:patient_id>', methods=['GET'])
 def get_patient(patient_id):
@@ -20,8 +50,10 @@ def get_patient(patient_id):
     patient = c.fetchone()
     conn.close()
     if patient:
-        return jsonify({"success": True, "data": dict(patient)})
-    return jsonify({"success": False, "message": "Patient not found"}), 404
+        p = dict(patient)
+        p['name'] = p['fullName']
+        return jsonify(p)
+    return jsonify({"error": "Patient not found"}), 404
 
 @patients_bp.route('/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
@@ -55,11 +87,7 @@ def get_vitals(patient_id):
     c.execute('SELECT * FROM vitals WHERE patientId = ? ORDER BY recordedAt DESC', (patient_id,))
     vitals = [dict(row) for row in c.fetchall()]
     conn.close()
-    
-    return jsonify({
-        "success": True,
-        "data": vitals
-    })
+    return jsonify(vitals)
 
 @patients_bp.route('/<patient_id>/vitals', methods=['POST'])
 def add_vitals(patient_id):
@@ -87,11 +115,7 @@ def get_timeline(patient_id):
     c.execute('SELECT * FROM timeline WHERE patientId = ? ORDER BY timestamp DESC', (patient_id,))
     timeline = [dict(row) for row in c.fetchall()]
     conn.close()
-    
-    return jsonify({
-        "success": True,
-        "data": timeline
-    })
+    return jsonify(timeline)
 
 @patients_bp.route('/<patient_id>/timeline', methods=['POST'])
 def add_timeline_event(patient_id):
@@ -118,7 +142,7 @@ def get_recovery(patient_id):
     c.execute('SELECT * FROM recovery_roadmap WHERE patientId = ?', (patient_id,))
     roadmap = [dict(row) for row in c.fetchall()]
     conn.close()
-    return jsonify({"success": True, "data": roadmap})
+    return jsonify(roadmap)
 
 # Medication Logs
 @patients_bp.route('/<patient_id>/medication-logs', methods=['GET'])
@@ -128,7 +152,7 @@ def get_medication_logs(patient_id):
     c.execute('SELECT * FROM medication_logs WHERE patientId = ? ORDER BY timestamp DESC', (patient_id,))
     logs = [dict(row) for row in c.fetchall()]
     conn.close()
-    return jsonify({"success": True, "data": logs})
+    return jsonify(logs)
 
 # Dashboard Stats (Charts)
 @patients_bp.route('/<patient_id>/stats', methods=['GET'])
@@ -153,7 +177,7 @@ def get_patient_stats(patient_id):
         "healthScore": 95
     }
     conn.close()
-    return jsonify({"success": True, "data": stats})
+    return jsonify(stats)
 
 @patients_bp.route('/<patient_id>/emergency-contacts', methods=['GET'])
 def get_patient_emergency_contacts(patient_id):
@@ -162,4 +186,4 @@ def get_patient_emergency_contacts(patient_id):
     c.execute('SELECT * FROM emergency_contacts WHERE patientId = ?', (patient_id,))
     contacts = [dict(row) for row in c.fetchall()]
     conn.close()
-    return jsonify({"success": True, "data": contacts})
+    return jsonify(contacts)

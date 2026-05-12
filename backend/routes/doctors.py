@@ -5,11 +5,11 @@ from utils.db import get_db_connection
 doctors_bp = Blueprint('doctors', __name__)
 
 DOCTORS_SEED = [
-    {"id": "doc_1", "name": "Dr. Sarah Johnson", "specialty": "Cardiology", "experience": "15 years", "rating": 4.9, "image": "https://ui-avatars.com/api/?name=Sarah+Johnson&background=random"},
-    {"id": "doc_2", "name": "Dr. Michael Chen", "specialty": "Neurology", "experience": "12 years", "rating": 4.8, "image": "https://ui-avatars.com/api/?name=Michael+Chen&background=random"},
-    {"id": "doc_3", "name": "Dr. Emily Davis", "specialty": "Pediatrics", "experience": "8 years", "rating": 4.7, "image": "https://ui-avatars.com/api/?name=Emily+Davis&background=random"},
-    {"id": "doc_4", "name": "Dr. Robert Smith", "specialty": "Orthopedics", "experience": "20 years", "rating": 4.9, "image": "https://ui-avatars.com/api/?name=Robert+Smith&background=random"},
-    {"id": "doc_5", "name": "Dr. Olivia Wilson", "specialty": "Dermatology", "experience": "10 years", "rating": 4.6, "image": "https://ui-avatars.com/api/?name=Olivia+Wilson&background=random"},
+    {"id": "doc_1", "name": "Dr. Sarah Johnson", "specialization": "Cardiology", "experience": "15", "rating": 4.9, "image": "https://ui-avatars.com/api/?name=Sarah+Johnson&background=random"},
+    {"id": "doc_2", "name": "Dr. Michael Chen", "specialization": "Neurology", "experience": "12", "rating": 4.8, "image": "https://ui-avatars.com/api/?name=Michael+Chen&background=random"},
+    {"id": "doc_3", "name": "Dr. Emily Davis", "specialization": "Pediatrics", "experience": "8", "rating": 4.7, "image": "https://ui-avatars.com/api/?name=Emily+Davis&background=random"},
+    {"id": "doc_4", "name": "Dr. Robert Smith", "specialization": "Orthopedics", "experience": "20", "rating": 4.9, "image": "https://ui-avatars.com/api/?name=Robert+Smith&background=random"},
+    {"id": "doc_5", "name": "Dr. Olivia Wilson", "specialization": "Dermatology", "experience": "10", "rating": 4.6, "image": "https://ui-avatars.com/api/?name=Olivia+Wilson&background=random"},
 ]
 
 @doctors_bp.route('/', methods=['GET'])
@@ -29,12 +29,12 @@ def get_doctors():
         doctors = DOCTORS_SEED
         
     conn.close()
+    # Map specialty to specialization for frontend compatibility
+    for d in doctors:
+        if 'specialty' in d:
+            d['specialization'] = d['specialty']
     
-    return jsonify({
-        "success": True,
-        "count": len(doctors),
-        "data": doctors
-    })
+    return jsonify(doctors)
 
 @doctors_bp.route('/<doctor_id>', methods=['GET'])
 def get_doctor_profile(doctor_id):
@@ -50,5 +50,7 @@ def get_doctor_profile(doctor_id):
     conn.close()
     
     if doctor:
-        return jsonify({"success": True, "data": dict(doctor)})
-    return jsonify({"success": False, "message": "Doctor not found"}), 404
+        d_dict = dict(doctor)
+        d_dict['specialization'] = d_dict.get('specialty')
+        return jsonify(d_dict)
+    return jsonify({"error": "Doctor not found"}), 404

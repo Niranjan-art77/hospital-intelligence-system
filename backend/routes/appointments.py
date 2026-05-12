@@ -14,7 +14,13 @@ def get_all_appointments():
         JOIN users d ON a.doctorId = d.id 
         ORDER BY a.appointmentTime ASC
     ''')
-    appointments = [dict(row) for row in c.fetchall()]
+    rows = c.fetchall()
+    appointments = []
+    for row in rows:
+        appt = dict(row)
+        appt['patient'] = {"name": row['patientName']}
+        appt['doctor'] = {"name": row['doctorName']}
+        appointments.append(appt)
     conn.close()
     return jsonify(appointments)
 
@@ -29,13 +35,13 @@ def get_patient_appointments(patient_id):
         WHERE a.patientId = ? 
         ORDER BY a.appointmentTime ASC
     ''', (patient_id,))
-    appointments = [dict(row) for row in c.fetchall()]
+    appointments = []
+    for row in c.fetchall():
+        appt = dict(row)
+        appt['doctor'] = {"name": row['doctorName']}
+        appointments.append(appt)
     conn.close()
-    
-    return jsonify({
-        "success": True,
-        "data": appointments
-    })
+    return jsonify(appointments)
 
 @appointments_bp.route('/doctor/<doctor_id>', methods=['GET'])
 def get_doctor_appointments(doctor_id):
@@ -48,13 +54,13 @@ def get_doctor_appointments(doctor_id):
         WHERE a.doctorId = ? 
         ORDER BY a.appointmentTime ASC
     ''', (doctor_id,))
-    appointments = [dict(row) for row in c.fetchall()]
+    appointments = []
+    for row in c.fetchall():
+        appt = dict(row)
+        appt['patient'] = {"name": row['patientName']}
+        appointments.append(appt)
     conn.close()
-    
-    return jsonify({
-        "success": True,
-        "data": appointments
-    })
+    return jsonify(appointments)
 
 @appointments_bp.route('/book', methods=['POST'])
 def book_appointment():

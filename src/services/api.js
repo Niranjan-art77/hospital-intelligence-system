@@ -5,7 +5,6 @@ import axios from "axios";
 // 2. Fallback to your specific Render URL
 // 3. Fallback to "/api" (Local Development)
 const API_URL =
-  import.meta.env.VITE_API_URL ||
   "https://hospital-intelligence-system-2.onrender.com/api";
 
 const API = axios.create({

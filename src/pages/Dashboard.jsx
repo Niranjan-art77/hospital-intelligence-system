@@ -122,7 +122,7 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex -space-x-3">
-            {doctors.slice(0, 3).map((d, i) => (
+            {(Array.isArray(doctors) ? doctors : []).slice(0, 3).map((d, i) => (
               <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 overflow-hidden shadow-lg">
                 <img src={d.profileImage} alt={d.name} className="w-full h-full object-cover" />
               </div>
@@ -150,7 +150,7 @@ export default function Dashboard() {
           { title: "Pending Appts", val: appointments.length, color: "from-emerald-500 to-teal-600", icon: <Calendar size={24} />, shadow: "shadow-emerald-500/20" },
           { title: "Avg Wait Time", val: "12m", color: "from-amber-400 to-orange-500", icon: <Clock size={24} />, shadow: "shadow-amber-500/20" },
           { title: "Bed Occupancy", val: `${stats.totalBeds - stats.availableBeds}/${stats.totalBeds}`, color: "from-indigo-500 to-blue-600", icon: <Bed size={24} />, shadow: "shadow-indigo-500/20" },
-          { title: "Critical Stock", val: pharmacy.filter(m => m.stock < 20).length, color: "from-rose-500 to-red-600", icon: <Pill size={24} />, shadow: "shadow-rose-500/20", pulse: true },
+          { title: "Critical Stock", val: (Array.isArray(pharmacy) ? pharmacy : []).filter(m => m.stock < 20).length, color: "from-rose-500 to-red-600", icon: <Pill size={24} />, shadow: "shadow-rose-500/20", pulse: true },
           { title: "Avg Health Score", val: healthScore, color: "from-cyan-400 to-blue-500", icon: <TrendingUp size={24} />, shadow: "shadow-cyan-500/20" }
         ].map((m, i) => (
           <motion.div
@@ -433,7 +433,7 @@ export default function Dashboard() {
               Priority Triage List
             </h3>
             <div className="space-y-4">
-              {patients.filter(p => p.riskCategory === 'HIGH' || p.riskLevel === 'HIGH' || p.age > 70).slice(0, 3).map((p, i) => (
+              {(Array.isArray(patients) ? patients : []).filter(p => p.riskCategory === 'HIGH' || p.riskLevel === 'HIGH' || p.age > 70).slice(0, 3).map((p, i) => (
                 <div key={p.id} className="p-4 bg-white/[0.03] rounded-2xl border border-white/5 flex items-center gap-4 group hover:bg-white/[0.06] transition-all cursor-pointer">
                   <div className="w-12 h-12 rounded-2xl bg-slate-800 border border-rose-500/30 p-0.5 group-hover:scale-110 transition-transform">
                     <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${p.name}`} alt="p" className="w-full h-full rounded-2xl bg-slate-950 object-cover" />
@@ -458,7 +458,7 @@ export default function Dashboard() {
               AI Predictive Insights
             </h3>
             <div className="space-y-4">
-              {insights.slice(0, 3).map((insight) => (
+              {(Array.isArray(insights) ? insights : []).slice(0, 3).map((insight) => (
                 <div key={insight.id} className="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-500/10 group hover:bg-indigo-500/10 transition-all">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-[9px] font-black text-indigo-400 uppercase tracking-tighter">{new Date(insight.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

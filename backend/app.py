@@ -27,6 +27,10 @@ def create_app():
     from routes.reports import reports_bp
     from routes.notifications import notifications_bp
     from routes.analytics import analytics_bp
+    from routes.pharmacy import pharmacy_bp
+    from routes.insights import insights_bp
+    from routes.beds import beds_bp
+    from routes.symptoms import symptoms_bp
 
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
     app.register_blueprint(messages_bp, url_prefix='/api/messages')
@@ -40,6 +44,10 @@ def create_app():
     app.register_blueprint(emergency_bp, url_prefix='/api/emergency')
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+    app.register_blueprint(pharmacy_bp, url_prefix='/api/pharmacy')
+    app.register_blueprint(insights_bp, url_prefix='/api/insights')
+    app.register_blueprint(beds_bp, url_prefix='/api/beds')
+    app.register_blueprint(symptoms_bp, url_prefix='/api/symptoms')
     
     # Special routes to match frontend expectations exactly
     @app.route('/api/hospitals/nearby', methods=['GET'])
@@ -56,6 +64,10 @@ def create_app():
     @app.errorhandler(404)
     def resource_not_found(e):
         return jsonify(error=str(e), message="Route not found on Flask backend. May not be migrated yet."), 404
+
+    # Initialize database
+    from utils.db import init_db
+    init_db()
 
     return app
 
