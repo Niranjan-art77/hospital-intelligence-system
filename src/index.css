@@ -206,6 +206,48 @@
   .neon-border-blue {
     @apply border border-blue-500/30 hover:border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-500;
   }
+
+  /* --- Futuristic Medical Command Center Utilities --- */
+
+  .hologram-card {
+    @apply bg-[#0EA5E9]/[0.02] backdrop-blur-3xl border border-[#0EA5E9]/20 rounded-[40px] relative overflow-hidden;
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.05), inset 0 0 20px rgba(14, 165, 233, 0.05);
+  }
+
+  .hologram-card::after {
+    content: "";
+    @apply absolute inset-0 pointer-events-none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(14, 165, 233, 0.03) 0px,
+      rgba(14, 165, 233, 0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    animation: hologramScan 10s linear infinite;
+  }
+
+  .scanning-line {
+    @apply absolute left-0 w-full h-[1px] bg-[#0EA5E9]/20 shadow-[0_0_8px_#0EA5E9] z-10;
+    animation: scanLineMove 4s linear infinite;
+  }
+
+  .neon-glow-cyan {
+    @apply shadow-[0_0_20px_rgba(6,182,212,0.4),inset_0_0_10px_rgba(6,182,212,0.2)];
+  }
+
+  .neon-glow-purple {
+    @apply shadow-[0_0_20px_rgba(168,85,247,0.4),inset_0_0_10px_rgba(168,85,247,0.2)];
+  }
+
+  .medical-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+  }
+
+  .hud-border {
+    @apply border-2 border-[#0EA5E9]/30 rounded-3xl relative;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%);
+  }
 }
 
 /* --- Keyframes --- */
@@ -285,4 +327,29 @@
   opacity: 0;
   transform: translateY(-20px) scale(0.98);
   transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+@keyframes hologramScan {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes scanLineMove {
+  0% { top: 0%; opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes pulseCyan {
+  0%, 100% { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.8); }
+}
+
+.animate-pulse-cyan {
+  animation: pulseCyan 2s infinite;
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
 }

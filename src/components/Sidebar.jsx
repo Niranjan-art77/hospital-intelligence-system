@@ -75,7 +75,16 @@ export default function Sidebar() {
         { name: "Recovery Path", path: "/patient/roadmap", icon: <Map size={20} /> }
     ];
 
-    const links = user?.role === "PATIENT" ? patientLinks : adminLinks;
+    const doctorLinks = [
+        { name: "Command Center", path: "/doctor/dashboard", icon: <LayoutDashboard size={20} /> },
+        { name: "Neural Patients", path: "/doctor/patients", icon: <Users size={20} /> },
+        { name: "Schedule", path: "/doctor/appointments", icon: <Calendar size={20} /> },
+        { name: "Lab & Reports", path: "/doctor/reports", icon: <FileText size={20} /> },
+        { name: "Symptom AI", path: "/symptom-checker", icon: <Search size={20} /> },
+        { name: "Messages", path: "/doctor/messages", icon: <MessageSquare size={20} /> }
+    ];
+
+    const links = user?.role === "PATIENT" ? patientLinks : (user?.role === "DOCTOR" ? doctorLinks : adminLinks);
 
     return (
         <motion.div 

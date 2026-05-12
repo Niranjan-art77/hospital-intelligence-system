@@ -25,6 +25,10 @@ def init_db():
             bloodGroup TEXT,
             phone TEXT,
             address TEXT,
+            chronicConditions TEXT,
+            photoUrl TEXT,
+            insuranceProvider TEXT,
+            allergies TEXT,
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -76,6 +80,9 @@ def init_db():
             bloodPressure TEXT,
             temperature REAL,
             oxygenLevel INTEGER,
+            sugarLevel REAL,
+            weight REAL,
+            height REAL,
             recordedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')

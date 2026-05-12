@@ -42,7 +42,7 @@ def add_patient():
     
     return jsonify({"success": True, "id": patient_id, "message": "Patient created"}), 201
 
-@patients_bp.route('/<int:patient_id>', methods=['GET'])
+@patients_bp.route('/<patient_id>', methods=['GET'])
 def get_patient(patient_id):
     conn = get_db_connection()
     c = conn.cursor()
@@ -55,7 +55,7 @@ def get_patient(patient_id):
         return jsonify(p)
     return jsonify({"error": "Patient not found"}), 404
 
-@patients_bp.route('/<int:patient_id>', methods=['PUT'])
+@patients_bp.route('/<patient_id>', methods=['PUT'])
 def update_patient(patient_id):
     data = request.json
     name = data.get('name')
@@ -100,9 +100,9 @@ def add_vitals(patient_id):
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('''
-        INSERT INTO vitals (patientId, heartRate, bloodPressure, temperature, oxygenLevel) 
-        VALUES (?, ?, ?, ?, ?)
-    ''', (patient_id, heartRate, bloodPressure, temperature, oxygenLevel))
+        INSERT INTO vitals (patientId, heartRate, bloodPressure, temperature, oxygenLevel, sugarLevel, weight, height) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (patient_id, heartRate, bloodPressure, temperature, oxygenLevel, data.get('sugarLevel'), data.get('weight'), data.get('height')))
     conn.commit()
     conn.close()
     
