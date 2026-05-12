@@ -23,8 +23,13 @@ def get_rooms(userId):
     conn.close()
     return jsonify(rooms)
 
-@messages_bp.route('/history/<senderId>/<receiverId>', methods=['GET'])
-def get_history(senderId, receiverId):
+@messages_bp.route('/history', methods=['GET'])
+def get_history_query():
+    senderId = request.args.get('user1')
+    receiverId = request.args.get('user2')
+    if not senderId or not receiverId:
+        return jsonify({"error": "Missing user1 or user2"}), 400
+        
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('''
@@ -36,14 +41,31 @@ def get_history(senderId, receiverId):
     conn.close()
     return jsonify(history)
 
-@messages_bp.route('/', methods=['POST'])
+@messages_bp.route('/history/<senderId>/<receiverId>', methods=['GET'])
+def get_history_params(senderId, receiverId):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT * FROM messages 
+        WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+        ORDER BY timestamp ASC
+    ''', (senderId, receiverId, receiverId, senderId))
+    history = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify(history)
+
 @messages_bp.route('/send', methods=['POST'])
+@messages_bp.route('/', methods=['POST'])
 def send_message():
     data = request.json
     senderId = data.get('senderId')
     receiverId = data.get('receiverId')
-    content = data.get('content')
+    # Support both 'content' and 'message' keys for flexibility
+    content = data.get('content') or data.get('message')
     
+    if not senderId or not receiverId or not content:
+        return jsonify({"error": "Missing required fields"}), 400
+        
     conn = get_db_connection()
     c = conn.cursor()
     c.execute('INSERT INTO messages (senderId, receiverId, content) VALUES (?, ?, ?)',

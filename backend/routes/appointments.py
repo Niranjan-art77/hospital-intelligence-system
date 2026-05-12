@@ -81,15 +81,32 @@ def book_appointment():
     
     return jsonify({"success": True, "message": "Appointment booked successfully"}), 201
 
-@appointments_bp.route('/<int:appt_id>/status', methods=['PATCH'])
+@appointments_bp.route('/<int:appt_id>/status', methods=['PATCH', 'PUT'])
 def update_status(appt_id):
     data = request.json
     status = data.get('status')
+    diagnosis = data.get('diagnosisNotes', '')
     
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute('UPDATE appointments SET status = ? WHERE id = ?', (status, appt_id))
+    if diagnosis:
+        c.execute('UPDATE appointments SET status = ?, reason = ? WHERE id = ?', (status, diagnosis, appt_id))
+    else:
+        c.execute('UPDATE appointments SET status = ? WHERE id = ?', (status, appt_id))
     conn.commit()
     conn.close()
     
     return jsonify({"success": True, "message": f"Appointment marked as {status}"})
+
+@appointments_bp.route('/<int:appt_id>/reschedule', methods=['PUT', 'POST'])
+def reschedule_appointment(appt_id):
+    data = request.json
+    new_time = data.get('appointmentTime')
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('UPDATE appointments SET appointmentTime = ?, status = "RESCHEDULED" WHERE id = ?', (new_time, appt_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"success": True, "message": "Appointment rescheduled successfully"})

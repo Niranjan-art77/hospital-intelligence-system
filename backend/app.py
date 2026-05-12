@@ -38,6 +38,7 @@ def create_app():
 
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
     app.register_blueprint(messages_bp, url_prefix='/api/messages')
+    app.register_blueprint(messages_bp, url_prefix='/api/chat')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
