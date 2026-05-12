@@ -182,6 +182,38 @@ export default function SymptomChecker() {
                 {/* Input Section */}
                 <div className="lg:col-span-12 xl:col-span-5 flex flex-col gap-6 relative">
                     <div className="absolute top-0 -left-10 w-64 h-64 bg-[#0EA5E9]/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    {/* Feature 8: Interactive Body Map */}
+                    <div className="card-nova p-6 border-cyan-500/20 bg-cyan-500/5 mb-2">
+                        <h3 className="text-xs font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2 mb-6">
+                            <Target size={16} /> Interactive Body Mapping
+                        </h3>
+                        <div className="flex justify-center gap-4 flex-wrap">
+                            {['Head', 'Chest', 'Abdomen', 'Back', 'Arms', 'Legs'].map(part => (
+                                <button 
+                                    key={part}
+                                    onClick={() => {
+                                        setSelectedBodyParts(prev => 
+                                            prev.includes(part) ? prev.filter(p => p !== part) : [...prev, part]
+                                        );
+                                    }}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                                        selectedBodyParts.includes(part) 
+                                        ? "bg-cyan-500 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]" 
+                                        : "bg-slate-900 text-slate-500 border-white/5 hover:border-cyan-500/30"
+                                    }`}
+                                >
+                                    {part}
+                                </button>
+                            ))}
+                        </div>
+                        {selectedBodyParts.length > 0 && (
+                            <p className="mt-4 text-center text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest">
+                                Selected: {selectedBodyParts.join(', ')}
+                            </p>
+                        )}
+                    </div>
+
                     <div className="card-nova p-8 relative z-10 w-full flex-1 flex flex-col">
                         <h2 className="text-xl font-black mb-4 text-white tracking-wide flex items-center gap-3">
                             <span className="w-2.5 h-2.5 rounded-full bg-[#0EA5E9] animate-pulse"></span>

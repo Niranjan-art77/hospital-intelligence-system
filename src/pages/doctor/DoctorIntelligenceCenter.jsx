@@ -25,6 +25,13 @@ const EMERGENCY_TRACKER = [
     { id: 3, type: "OPD", label: "Neuro Ward", status: "Stable", level: 30 },
 ];
 
+// Feature 2: AI Diagnosis Preview Mock
+const AI_DIAGNOSIS_PREVIEWS = {
+    "Chronic Hypertension": { confidence: 92, recommendation: "Increase ACE inhibitor dosage, monitor renal function." },
+    "Type 2 Diabetes": { confidence: 88, recommendation: "Metformin adjustment needed, check HbA1c levels." },
+    "Asthma": { confidence: 95, recommendation: "Switch to long-acting beta-agonist, avoid environmental triggers." }
+};
+
 export default function DoctorIntelligenceCenter() {
     const { user } = useAuth();
     const [patients, setPatients] = useState([]);
@@ -359,6 +366,27 @@ export default function DoctorIntelligenceCenter() {
                                 <span className="text-[10px] font-black uppercase tracking-widest">{action.label}</span>
                             </button>
                         ))}
+                    </div>
+
+                    {/* Feature 1: Telemedicine Hub */}
+                    <div className="hologram-card p-8 border-cyan-500/30 bg-cyan-500/5">
+                        <h3 className="text-white font-black tracking-tight flex items-center gap-3 mb-6 uppercase text-sm">
+                            <Target size={20} className="text-cyan-400" /> Telemedicine Hub
+                        </h3>
+                        <div className="p-4 bg-slate-900/60 rounded-2xl border border-white/5 flex items-center justify-between group cursor-pointer hover:border-cyan-500/30 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white">
+                                    <Activity size={18} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-white uppercase">Active Session: #092</p>
+                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Waiting: Patient Sarah J.</p>
+                                </div>
+                            </div>
+                            <button className="px-4 py-2 bg-cyan-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-600 transition-colors shadow-lg shadow-cyan-500/20">
+                                Connect
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

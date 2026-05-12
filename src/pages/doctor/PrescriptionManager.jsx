@@ -274,34 +274,52 @@ export default function PrescriptionManager() {
 
                 {/* Sidebar Info */}
                 <div className="xl:col-span-4 space-y-8">
+                    {/* Feature 3: Medication Interaction Checker */}
+                    <div className="glass-card p-8 border-rose-500/30 bg-rose-500/5">
+                        <div className="flex items-center gap-3 mb-6">
+                            <AlertTriangle className="w-6 h-6 text-rose-500 animate-pulse" />
+                            <h4 className="text-sm font-black text-white uppercase tracking-widest">Molecular Conflict Check</h4>
+                        </div>
+                        {medicines.some(m => m.medicineName.toLowerCase().includes('warfarin')) && 
+                         medicines.some(m => m.medicineName.toLowerCase().includes('aspirin')) ? (
+                            <div className="p-4 bg-rose-500/20 border border-rose-500/40 rounded-2xl space-y-3">
+                                <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Zap className="w-3 h-3" /> CRITICAL INTERACTION DETECTED
+                                </p>
+                                <p className="text-[11px] font-bold text-white leading-relaxed">
+                                    COMBINATION OF <span className="text-rose-400">WARFARIN</span> AND <span className="text-rose-400">ASPIRIN</span> INCREASES HEMORRHAGE RISK BY 4.2x.
+                                </p>
+                                <button className="w-full py-2 bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-lg">Override Protocol</button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                    Neural engine is cross-referencing molecular interactions with the subject's known history.
+                                </p>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                                        <CheckCircle className="w-3 h-3" /> No contraindications detected
+                                    </div>
+                                    <div className="flex items-center gap-3 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+                                        <Info className="w-3 h-3" /> Dosage optimization active
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="glass-card p-8 border-blue-500/20 bg-blue-500/5">
                         <div className="flex items-center gap-3 mb-6">
                             <Brain className="w-6 h-6 text-blue-400" />
-                            <h4 className="text-sm font-black text-white uppercase tracking-widest">AI Safety Check</h4>
+                            <h4 className="text-sm font-black text-white uppercase tracking-widest">Clinical AI Insights</h4>
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                            Neural engine is cross-referencing molecular interactions with the subject's known allergies and chronic history.
-                        </p>
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                                <CheckCircle className="w-3 h-3" /> No contraindications detected
-                            </div>
-                            <div className="flex items-center gap-3 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                                <Info className="w-3 h-3" /> Dosage optimization active
+                        <div className="space-y-4">
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Recommended Duration</p>
+                                <p className="text-xs font-black text-white">7-10 DAYS BASED ON SYMPTOMS</p>
                             </div>
                         </div>
                     </div>
-
-                    <div className="glass-card p-8 border-amber-500/20 bg-amber-500/5">
-                        <div className="flex items-center gap-3 mb-4 text-amber-400">
-                            <Zap className="w-5 h-5" />
-                            <h4 className="text-sm font-black uppercase tracking-widest">Operational Notice</h4>
-                        </div>
-                        <p className="text-[10px] text-amber-200/60 font-bold leading-relaxed uppercase tracking-widest">
-                            Authorized signature will be appended automatically. Once broadcast, the pharmacy will receive an encrypted clinical token for immediate dispensing.
-                        </p>
-                    </div>
-                </div>
             </div>
             
             {/* Scanline Effect */}

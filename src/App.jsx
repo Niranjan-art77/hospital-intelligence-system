@@ -5,9 +5,9 @@ import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
-// Admin pages (existing)
+// Admin pages
 import AdminLayout from "./layouts/AdminLayout";
-import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import Patients from "./pages/Patients";
 import HighRisk from "./pages/highrisk";
 import Doctors from "./pages/Doctors";
@@ -22,6 +22,10 @@ import ICUMonitor from "./pages/ICUMonitor";
 import NotificationCenter from "./pages/NotificationCenter";
 import DiseaseStats from "./pages/DiseaseStats";
 import PharmacyDashboard from "./pages/pharmacy/PharmacyDashboard";
+
+// Staff pages
+import StaffLayout from "./layouts/StaffLayout";
+import StaffDashboard from "./pages/staff/StaffDashboard";
 
 // Doctor pages
 import DoctorLayout from "./layouts/DoctorLayout";
@@ -59,7 +63,8 @@ const RoleRoute = ({ children, allowedRoles }) => {
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to their proper dashboard
-    if (user.role === "ADMIN" || user.role === "STAFF") return <Navigate to="/admin" replace />;
+    if (user.role === "ADMIN") return <Navigate to="/admin" replace />;
+    if (user.role === "STAFF") return <Navigate to="/staff" replace />;
     if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
     if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
   }
@@ -71,7 +76,8 @@ const RootRedirect = () => {
   const { user, loading } = useAuth();
   if (loading) return <div className="loading-spinner"><div className="spinner" /></div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role === "ADMIN" || user.role === "STAFF") return <Navigate to="/admin" replace />;
+  if (user.role === "ADMIN") return <Navigate to="/admin" replace />;
+  if (user.role === "STAFF") return <Navigate to="/staff" replace />;
   if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
   if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
   return <Navigate to="/login" replace />;
@@ -86,11 +92,11 @@ export default function App() {
 
         {/* Admin Routes */}
         <Route path="/admin" element={
-          <RoleRoute allowedRoles={["ADMIN", "STAFF"]}>
+          <RoleRoute allowedRoles={["ADMIN"]}>
             <AdminLayout />
           </RoleRoute>
         }>
-          <Route index element={<Dashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="patients" element={<Patients />} />
           <Route path="add-patient" element={<AddPatient />} />
           <Route path="highrisk" element={<HighRisk />} />
@@ -105,6 +111,22 @@ export default function App() {
           <Route path="notifications" element={<NotificationCenter />} />
           <Route path="disease-stats" element={<DiseaseStats />} />
           <Route path="pharmacy-verification" element={<PharmacyDashboard />} />
+        </Route>
+
+        {/* Staff Routes */}
+        <Route path="/staff" element={
+          <RoleRoute allowedRoles={["STAFF", "ADMIN"]}>
+            <StaffLayout />
+          </RoleRoute>
+        }>
+          <Route index element={<StaffDashboard />} />
+          <Route path="beds" element={<Beds />} />
+          <Route path="patients" element={<Patients />} />
+          <Route path="pharmacy" element={<Pharmacy />} />
+          <Route path="appointments" element={<Appointments />} />
+          <Route path="icu-monitor" element={<ICUMonitor />} />
+          <Route path="ambulance" element={<Ambulance />} />
+          <Route path="notifications" element={<NotificationCenter />} />
         </Route>
 
         {/* Doctor Routes */}
