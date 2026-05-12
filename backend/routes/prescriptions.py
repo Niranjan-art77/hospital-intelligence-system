@@ -52,6 +52,7 @@ def get_patient_prescriptions(patient_id):
     return jsonify(prescriptions)
 
 @prescriptions_bp.route('/add', methods=['POST'])
+@prescriptions_bp.route('/create', methods=['POST'])
 def add_prescription():
     data = request.json
     patient_id = data.get('patientId')

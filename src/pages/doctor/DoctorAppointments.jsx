@@ -111,7 +111,7 @@ export default function DoctorAppointments() {
 
     const submitPrescription = async () => {
         try {
-            await API.post("/api/prescriptions/create", {
+            await API.post("/prescriptions/create", {
                 patientId: prescribeModal.patient?.id || prescribeModal.patientId,
                 doctorId: user.id,
                 appointmentId: prescribeModal.id,

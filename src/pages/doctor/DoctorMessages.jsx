@@ -21,7 +21,7 @@ export default function DoctorMessages() {
 
     useEffect(() => {
         // Load patients
-        API.get("/api/patients")
+        API.get("/patients")
            .then(res => setPatients(res.data))
            .catch(console.error);
 
@@ -71,7 +71,7 @@ export default function DoctorMessages() {
         };
 
         try {
-            await API.post("/api/chat/send", msgData);
+            await API.post("/chat/send", msgData);
             socketService.sendMessage(msgData);
             setMessages(prev => [...prev, msgData]);
             setInput("");

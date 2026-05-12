@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../services/api";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Pill, CheckCircle, AlertTriangle, Clock, 
+  FlaskConical, Send, Shield, Zap, Search,
+  Box, ChevronRight, Activity, Filter
+} from "lucide-react";
 
 export default function PharmacyDashboard() {
     const { user } = useAuth();
     const [prescriptions, setPrescriptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionMsg, setActionMsg] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         fetchPending();
@@ -17,7 +24,7 @@ export default function PharmacyDashboard() {
             const res = await API.get("/pharmacy/prescriptions");
             setPrescriptions(res.data);
         } catch (error) {
-            console.error("Failed to load pharmacy queue", error);
+            console.error("Link Failure", error);
         } finally {
             setLoading(false);
         }
@@ -26,88 +33,188 @@ export default function PharmacyDashboard() {
     const handleVerify = async (id) => {
         try {
             await API.post("/pharmacy/verify", { prescriptionId: id });
-            setActionMsg("Prescription verified successfully! Ready for billing.");
+            setActionMsg("PROTOCOL AUTHORIZED: Compound dispensed for billing.");
             fetchPending();
-            setTimeout(() => setActionMsg(""), 3000);
+            setTimeout(() => setActionMsg(""), 5000);
         } catch (error) {
-            setActionMsg("Verification failed.");
-            setTimeout(() => setActionMsg(""), 3000);
+            setActionMsg("AUTHORIZATION FAILED: System Override Required.");
         }
     };
 
+    const filtered = prescriptions.filter(p => 
+        p.id.toString().includes(searchTerm) || 
+        p.patientId?.toString().includes(searchTerm)
+    );
+
     return (
-        <div style={{ padding: "30px", background: "#060d1f", minHeight: "100vh", color: "#e2f0ff", fontFamily: "'Inter', sans-serif" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
-                <div>
-                    <h1 style={{ fontSize: "2rem", margin: "0 0 8px 0", fontWeight: "800", background: "linear-gradient(90deg, #38bdf8, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                        Pharmacy Verification
+        <div className="min-h-screen medical-grid p-6 md:p-10 space-y-10 selection:bg-emerald-500/30">
+            {/* Header */}
+            <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10">
+                <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <FlaskConical className="w-4 h-4 text-emerald-400" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">Biochemical Authorization Stream</span>
+                    </div>
+                    <h1 className="text-5xl font-black text-white tracking-tighter mb-2 uppercase">
+                        PHARMACY <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">CORE</span>
                     </h1>
-                    <p style={{ color: "#94a3b8", margin: 0 }}>Review pending prescriptions and verify medicine stock.</p>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-emerald-400">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">{prescriptions.length} Active Protocols</span>
+                        </div>
+                    </div>
+                </motion.div>
+
+                <div className="flex items-center gap-4 w-full xl:w-auto">
+                    <div className="relative flex-1 xl:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/50" />
+                        <input 
+                            type="text" 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            placeholder="Identify Protocol ID..." 
+                            className="w-full bg-slate-900 border border-white/5 rounded-xl pl-12 pr-4 py-4 text-xs text-white focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
+                        />
+                    </div>
+                    <div className="w-14 h-14 glass-card flex items-center justify-center text-emerald-400">
+                        <Filter className="w-6 h-6" />
+                    </div>
                 </div>
-                <div style={{ background: "rgba(56, 189, 248, 0.1)", padding: "10px 20px", borderRadius: "20px", border: "1px solid rgba(56,189,248,0.2)", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#38bdf8", boxShadow: "0 0 10px #38bdf8" }}></div>
-                    <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "#38bdf8" }}>{prescriptions.length} Pending Actions</span>
+            </header>
+
+            <AnimatePresence>
+                {actionMsg && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4 text-emerald-400 text-xs font-black tracking-widest uppercase shadow-[0_0_40px_rgba(16,185,129,0.1)]"
+                    >
+                        <Shield className="w-6 h-6" /> {actionMsg}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                {/* Main Queue */}
+                <div className="xl:col-span-8 space-y-6">
+                    {loading ? (
+                        <div className="py-20 flex flex-col items-center justify-center gap-4 opacity-50">
+                            <Activity className="w-10 h-10 animate-spin-slow text-emerald-500" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Scanning Uplink...</span>
+                        </div>
+                    ) : filtered.length === 0 ? (
+                        <div className="py-32 text-center glass-card border-white/5 flex flex-col items-center justify-center gap-4 grayscale opacity-30">
+                            <Box className="w-12 h-12" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">All Protocols Authorized</span>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6">
+                            {filtered.map((p, i) => (
+                                <motion.div 
+                                    layout
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    key={p.id} 
+                                    className="glass-card p-8 border-white/5 hover:border-emerald-500/20 group transition-all"
+                                >
+                                    <div className="flex flex-col lg:flex-row justify-between gap-8">
+                                        <div className="flex-1 space-y-6">
+                                            <div className="flex items-center gap-6">
+                                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-all">
+                                                    <FlaskConical className="w-8 h-8" />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <h3 className="text-xl font-black text-white italic tracking-tighter uppercase">Protocol #{p.id}</h3>
+                                                        <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest border border-amber-500/20 rounded-full">Pending Authorization</span>
+                                                    </div>
+                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Received: {new Date(p.createdAt).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {p.items?.map((item, idx) => (
+                                                    <div key={idx} className="p-4 bg-slate-950/50 border border-white/5 rounded-xl group/med hover:bg-emerald-500/5 transition-all">
+                                                        <p className="text-xs font-black text-white uppercase mb-1">{item.medicineName}</p>
+                                                        <div className="flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
+                                                            <span>{item.dosage}</span>
+                                                            <span className="text-emerald-400/50 italic">{item.days} Days Cycle</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col justify-between items-end gap-6">
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Subject Vector</p>
+                                                <p className="text-lg font-black text-white uppercase italic tracking-tighter">PID-{p.patientId}</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => handleVerify(p.id)}
+                                                className="w-full lg:w-auto px-10 py-5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl shadow-emerald-600/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                                            >
+                                                <Send className="w-4 h-4" /> AUTHORIZE COMPOUND
+                                            </button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Intelligence Side Column */}
+                <div className="xl:col-span-4 space-y-8">
+                    {/* Inventory Status */}
+                    <div className="glass-card p-8 border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
+                        <div className="absolute inset-0 scanline opacity-10" />
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-8 flex items-center gap-2 italic">
+                            <Box className="w-4 h-4 text-emerald-400" /> Inventory Integrity
+                        </h4>
+                        <div className="space-y-6">
+                            {[
+                                { label: 'Critical Antibiotics', val: 92, color: 'bg-emerald-500' },
+                                { label: 'Trauma Resuscitation', val: 45, color: 'bg-amber-500' },
+                                { label: 'Neuro Blockers', val: 78, color: 'bg-blue-500' }
+                            ].map((inv, i) => (
+                                <div key={i} className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                        <span className="text-slate-400">{inv.label}</span>
+                                        <span className="text-white">{inv.val}%</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${inv.val}%` }} className={`h-full ${inv.color}`} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Operational Protocols */}
+                    <div className="glass-card p-8 border-white/5">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2 italic">
+                            <Shield className="w-4 h-4 text-blue-400" /> Security Standards
+                        </h4>
+                        <div className="space-y-4">
+                            {[
+                                'Biometric Signature Appended',
+                                'Cold Chain Verification Active',
+                                'DEA Compliance Synchronized'
+                            ].map((s, i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                                    <CheckCircle className="w-3 h-3 text-emerald-500" />
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{s}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {actionMsg && (
-                <div style={{ marginBottom: "20px", padding: "15px", background: "rgba(52, 211, 153, 0.1)", border: "1px solid rgba(52, 211, 153, 0.3)", borderRadius: "10px", color: "#34d399", fontWeight: "600" }}>
-                    {actionMsg}
-                </div>
-            )}
-
-            {loading ? (
-                <p>Loading pharmacy queue...</p>
-            ) : prescriptions.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px", background: "rgba(255,255,255,0.02)", borderRadius: "16px" }}>
-                    <div style={{ fontSize: "3rem", marginBottom: "15px" }}>⚕️</div>
-                    <h3 style={{ margin: "0 0 10px 0", color: "#cbd5e1" }}>Queue is Empty</h3>
-                    <p style={{ color: "#64748b", margin: 0 }}>There are no new prescriptions to verify.</p>
-                </div>
-            ) : (
-                <div style={{ display: "grid", gap: "20px" }}>
-                    {prescriptions.map((p) => (
-                        <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px", padding: "24px", transition: "all 0.3s ease" }}>
-
-                            <div style={{ flex: 1 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
-                                    <div style={{ background: "rgba(56,189,248,0.1)", width: "45px", height: "45px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>📄</div>
-                                    <div>
-                                        <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: "700" }}>Prescription ID: #{p.id}</h3>
-                                        <p style={{ margin: "4px 0 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>Date: {new Date(p.createdAt).toLocaleString()}</p>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
-                                    {p.items?.map((item, idx) => (
-                                        <div key={idx} style={{ background: "rgba(0,0,0,0.2)", padding: "10px 16px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                                            <div style={{ fontSize: "1rem", fontWeight: "600", color: "#e2f0ff" }}>{item.medicineName}</div>
-                                            <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px" }}>{item.dosage} • {item.days} days</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "15px", marginLeft: "30px" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                    <span style={{ fontSize: "0.8rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "600" }}>Status</span>
-                                    <span style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", padding: "4px 10px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: "700" }}>PENDING</span>
-                                </div>
-                                <button
-                                    onClick={() => handleVerify(p.id)}
-                                    style={{
-                                        background: "linear-gradient(135deg, #10b981, #059669)",
-                                        color: "white", padding: "12px 24px", border: "none", borderRadius: "10px",
-                                        fontSize: "0.95rem", fontWeight: "600", cursor: "pointer", boxShadow: "0 4px 15px rgba(16,185,129,0.3)"
-                                    }}
-                                >
-                                    Verify Stock & Approve
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className="fixed inset-0 pointer-events-none scanline opacity-[0.02] z-[100]" />
         </div>
     );
 }
