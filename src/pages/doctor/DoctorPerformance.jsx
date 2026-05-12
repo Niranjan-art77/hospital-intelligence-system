@@ -4,6 +4,11 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, AreaChart, Area, PieChart, Pie, Cell
 } from "recharts";
+import { 
+    Trophy, TrendingUp, Users, Star, 
+    Clock, CheckCircle, Download, Calendar,
+    Zap, Activity, Target, Shield, Brain
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const COLORS = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#a855f7"];
@@ -27,80 +32,104 @@ export default function DoctorPerformance() {
     const { user } = useAuth();
 
     return (
-        <motion.div className="page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ padding: "20px" }}>
-            {/* Header */}
-            <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="p-8 space-y-10 selection:bg-indigo-500/30">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 style={{ fontSize: "2.2rem", fontWeight: 800, background: "linear-gradient(135deg, #a855f7, #6366f1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", margin: "0 0 4px" }}>
-                        🏆 Performance Analytics
+                    <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+                        Clinical <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Integrity</span> Dashboard
                     </h1>
-                    <p style={{ color: "#64748b", margin: 0 }}>Clinical excellence & productivity metrics for {user?.fullName || "Dr. Sanjay"}</p>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+                        <Trophy size={12} className="text-indigo-500" /> Neural Analytics & Performance Metrics
+                    </p>
                 </div>
-                <div style={{ display: "flex", gap: "10px" }}>
-                    <select style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", padding: "8px 12px", borderRadius: "10px", outline: "none", fontSize: "0.85rem" }}>
+                
+                <div className="flex items-center gap-4">
+                    <select className="bg-slate-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest focus:outline-none focus:border-indigo-500/30 transition-all">
                         <option>Last 6 Months</option>
-                        <option>This Year</option>
+                        <option>Current Fiscal</option>
+                        <option>Global Baseline</option>
                     </select>
-                    <button style={{ background: "linear-gradient(135deg, #a855f7, #6366f1)", border: "none", color: "white", padding: "8px 16px", borderRadius: "10px", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-                        Export PDF
+                    <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
+                        <Download size={14} /> Export Protocol
                     </button>
                 </div>
             </div>
 
-            {/* Top Stats Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "24px" }}>
+            {/* Performance HUD Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: "Patients Treated", val: "1,248", change: "+12%", color: "#0ea5e9", icon: "👥" },
-                    { label: "Avg Rating", val: "4.92", change: "+0.1", color: "#f59e0b", icon: "⭐" },
-                    { label: "Consultation Time", val: "14m", change: "-2m", color: "#10b981", icon: "🕒" },
-                    { label: "Success Rate", val: "94%", change: "+3%", color: "#a855f7", icon: "✅" },
-                ].map(s => (
-                    <div key={s.label} style={{ background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "20px", padding: "20px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                            <div style={{ fontSize: "1.5rem" }}>{s.icon}</div>
-                            <div style={{ fontSize: "0.7rem", fontWeight: 800, color: s.change.startsWith("+") ? "#10b981" : "#ef4444", background: s.change.startsWith("+") ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", padding: "2px 8px", borderRadius: "6px" }}>
-                                {s.change}
+                    { label: "Subjects Treated", val: "1,248", change: "+12%", color: "text-blue-400", bg: "bg-blue-400/10", icon: Users },
+                    { label: "Neural Rating", val: "4.92", change: "+0.1", color: "text-amber-400", bg: "bg-amber-400/10", icon: Star },
+                    { label: "Consult Latency", val: "14m", change: "-2m", color: "text-emerald-400", bg: "bg-emerald-400/10", icon: Clock },
+                    { label: "Success Index", val: "94%", change: "+3%", color: "text-purple-400", bg: "bg-purple-400/10", icon: CheckCircle },
+                ].map((s, i) => (
+                    <motion.div 
+                        key={i} 
+                        whileHover={{ y: -5 }}
+                        className="glass-card p-6 border-white/5 relative overflow-hidden group"
+                    >
+                        <div className="hud-corner top-left opacity-20" />
+                        <div className="flex justify-between items-start mb-6">
+                            <div className={`w-12 h-12 rounded-xl ${s.bg} flex items-center justify-center ${s.color}`}>
+                                <s.icon size={24} />
                             </div>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${s.change.startsWith("+") ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                                {s.change}
+                            </span>
                         </div>
-                        <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "white", marginBottom: "4px" }}>{s.val}</div>
-                        <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>{s.label}</div>
-                    </div>
+                        <h4 className="text-3xl font-black text-white italic mb-1">{s.val}</h4>
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{s.label}</p>
+                    </motion.div>
                 ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px", marginBottom: "20px" }}>
-
-                {/* Patient Volume Area Chart */}
-                <div style={{ background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "24px" }}>
-                    <h3 style={{ margin: "0 0 24px", fontSize: "1.1rem", fontWeight: 800 }}>📈 Patient Volume & Satisfaction</h3>
-                    <div style={{ height: "300px" }}>
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                {/* Subject Volume Area Chart */}
+                <div className="xl:col-span-8 glass-card p-10 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
+                    <div className="hud-corner top-left" />
+                    <div className="flex justify-between items-center mb-10">
+                        <div>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                                <Activity size={20} className="text-indigo-400" /> Subject Volume & Satisfaction
+                            </h3>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Bi-annual clinical throughput analysis</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Live Feed</span>
+                        </div>
+                    </div>
+                    
+                    <div className="h-[350px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={monthlyData}>
                                 <defs>
-                                    <linearGradient id="colorPat" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                                    <linearGradient id="indigoHUD" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#475569" fontSize={12} />
-                                <YAxis stroke="#475569" fontSize={12} />
-                                <Tooltip
-                                    contentStyle={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
-                                />
-                                <Area type="monotone" dataKey="patients" stroke="#a855f7" fillOpacity={1} fill="url(#colorPat)" strokeWidth={3} />
+                                <XAxis dataKey="name" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                <Tooltip contentStyle={{ background: '#020617', border: '1px solid rgba(129,140,248,0.2)', borderRadius: '12px' }} />
+                                <Area type="monotone" dataKey="patients" stroke="#818cf8" strokeWidth={4} fillOpacity={1} fill="url(#indigoHUD)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Patient Categories Donut */}
-                <div style={{ background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "24px" }}>
-                    <h3 style={{ margin: "0 0 24px", fontSize: "1.1rem", fontWeight: 800 }}>🧬 Case Distribution</h3>
-                    <div style={{ height: "240px" }}>
+                {/* Case Distribution Donut */}
+                <div className="xl:col-span-4 glass-card p-10 border-white/5 relative overflow-hidden">
+                    <div className="hud-corner top-right opacity-20" />
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest mb-10 flex items-center gap-3">
+                        <Target size={18} className="text-purple-400" /> Case Distribution
+                    </h3>
+                    <div className="h-[250px] w-full mb-8">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={patientTypeData} innerRadius={60} outerRadius={80} dataKey="value" stroke="none">
+                                <Pie data={patientTypeData} innerRadius={70} outerRadius={90} dataKey="value" stroke="none">
                                     {patientTypeData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
@@ -109,39 +138,47 @@ export default function DoctorPerformance() {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
+                    <div className="space-y-4">
                         {patientTypeData.map((d, i) => (
-                            <div key={d.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: COLORS[i] }} />
-                                    <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{d.name}</span>
+                            <div key={d.name} className="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i] }} />
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{d.name}</span>
                                 </div>
-                                <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "white" }}>{d.value}%</span>
+                                <span className="text-xs font-black text-white">{d.value}%</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Feedback Highlights */}
-            <div style={{ background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "24px", padding: "24px" }}>
-                <h3 style={{ margin: "0 0 20px", fontSize: "1.1rem", fontWeight: 800 }}>💬 Patient Feedback Highlights</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+            {/* Neural Feedback Ledger */}
+            <div className="glass-card p-10 border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden">
+                <div className="hud-corner bottom-left opacity-20" />
+                <h3 className="text-sm font-black text-white uppercase tracking-widest mb-10 flex items-center gap-3 italic">
+                    <Brain size={20} className="text-indigo-400" /> Neural Feedback Ledger
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                        { patient: "Rahul S.", rating: 5, text: "Excellent consultation! The AI-assisted diagnosis was explained perfectly.", color: "#10b981" },
-                        { patient: "Priya M.", rating: 5, text: "Dr. Sanjay is very patient. The digital health card integration is a lifesaver.", color: "#0ea5e9" },
-                        { patient: "Amit K.", rating: 4, text: "Wait time was a bit more than expected, but the treatment plan is solid.", color: "#f59e0b" },
+                        { patient: "Rahul S.", rating: 5, text: "Excellent consultation! The AI-assisted diagnosis was explained perfectly.", color: "indigo" },
+                        { patient: "Priya M.", rating: 5, text: "Dr. Sanjay is very patient. The digital health card integration is a lifesaver.", color: "cyan" },
+                        { patient: "Amit K.", rating: 4, text: "Wait time was a bit more than expected, but the treatment plan is solid.", color: "amber" },
                     ].map((f, i) => (
-                        <div key={i} style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "16px", border: `1px solid ${f.color}15` }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                                <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "white" }}>{f.patient}</span>
-                                <span style={{ color: "#f59e0b", fontSize: "0.8rem" }}>{"★".repeat(f.rating)}</span>
+                        <div key={i} className={`p-6 bg-slate-950/50 rounded-2xl border border-${f.color}-500/10 group hover:border-${f.color}-500/30 transition-all`}>
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="font-black text-white text-[11px] uppercase tracking-tighter">{f.patient}</span>
+                                <div className="flex gap-1">
+                                    {[...Array(f.rating)].map((_, i) => <Star key={i} size={10} className="text-amber-500 fill-current" />)}
+                                </div>
                             </div>
-                            <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8", fontStyle: "italic", lineHeight: 1.4 }}>"{f.text}"</p>
+                            <p className="text-[11px] text-slate-400 font-bold leading-relaxed italic opacity-80">"{f.text}"</p>
                         </div>
                     ))}
                 </div>
             </div>
-        </motion.div>
+
+            {/* Scanline Effect */}
+            <div className="fixed inset-0 pointer-events-none scanline opacity-[0.02]" />
+        </div>
     );
 }

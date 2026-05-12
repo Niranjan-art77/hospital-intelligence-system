@@ -119,9 +119,9 @@ class SocketService {
         }
     }
 
-    emitTyping(roomId, userId, isTyping) {
+    emitTyping(conversationId, userId, isTyping) {
         if (this.socket && this.connected) {
-            this.socket.emit('typing', { roomId, userId, isTyping });
+            this.socket.emit('typing', { conversationId, userId, isTyping });
         }
     }
 

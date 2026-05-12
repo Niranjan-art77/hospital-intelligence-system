@@ -63,7 +63,7 @@ export const ChatProvider = ({ children }) => {
         });
     }, [user?.id]);
 
-    const handleTypingIndicator = useCallback(({ userId, isTyping }) => {
+    const handleTypingIndicator = useCallback(({ conversationId, userId, isTyping }) => {
         setTypingUsers(prev => {
             const newSet = new Set(prev);
             if (isTyping) {

@@ -97,13 +97,13 @@ def create_app():
 
     @socketio.on('send-message')
     def handle_send_message(data):
-        room = data.get('roomId')
+        room = data.get('conversationId')
         emit('new-message', data, room=room)
         print(f'Message sent to room {room}: {data.get("content")}')
 
     @socketio.on('typing')
     def handle_typing(data):
-        room = data.get('roomId')
+        room = data.get('conversationId')
         emit('user-typing', data, room=room, include_self=False)
 
     # Initialize database
