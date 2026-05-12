@@ -6,14 +6,17 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
-    
+
     # Initialize SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
     @app.route('/', methods=['GET'])
     def index():
-        return jsonify({"status": "active", "message": "Health Intelligence System Backend Running (Flask)"})
-        
+        return jsonify({
+            "status": "active",
+            "message": "Health Intelligence System Backend Running (Flask)"
+        })
+
     @app.route('/api/health', methods=['GET'])
     def health():
         return jsonify({"status": "ok"})
@@ -36,8 +39,8 @@ def create_app():
     from routes.beds import beds_bp
     from routes.symptoms import symptoms_bp
 
+    # Blueprint registrations
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
-    app.register_blueprint(messages_bp, url_prefix='/api/messages')
     app.register_blueprint(messages_bp, url_prefix='/api/chat')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
@@ -53,8 +56,8 @@ def create_app():
     app.register_blueprint(insights_bp, url_prefix='/api/insights')
     app.register_blueprint(beds_bp, url_prefix='/api/beds')
     app.register_blueprint(symptoms_bp, url_prefix='/api/symptoms')
-    
-    # Special routes to match frontend expectations exactly
+
+    # Special routes
     @app.route('/api/hospitals/nearby', methods=['GET'])
     def root_hospitals():
         from routes.emergency import get_nearby_hospitals
@@ -64,11 +67,14 @@ def create_app():
     def root_emergency_log():
         from routes.emergency import log_emergency
         return log_emergency()
-    
-    # Optional: Catch-all to provide a meaningful error for not migrated routes
+
+    # 404 Handler
     @app.errorhandler(404)
     def resource_not_found(e):
-        return jsonify(error=str(e), message="Route not found on Flask backend. May not be migrated yet."), 404
+        return jsonify(
+            error=str(e),
+            message="Route not found on Flask backend. May not be migrated yet."
+        ), 404
 
     # SocketIO Handlers
     @socketio.on('connect')
@@ -106,9 +112,16 @@ def create_app():
 
     return app, socketio
 
+
 app, socketio = create_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    # Use socketio.run instead of app.run
-    socketio.run(app, host="0.0.0.0", port=port, debug=True)
+
+    # IMPORTANT: use socketio.run()
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        debug=True
+    )
