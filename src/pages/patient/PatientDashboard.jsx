@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { generatePrescriptionPDF } from "../../utils/pdfGenerator";
 import { motion, AnimatePresence } from "framer-motion";
+import { io as socketIO } from "socket.io-client";
 import { 
   Heart, Activity, Thermometer, Droplets, 
   MapPin, Bell, CreditCard, ArrowRight, 
@@ -34,6 +35,7 @@ export default function PatientDashboard() {
     const [vitals, setVitals] = useState({ heartRate: 72, bp: "120/80", temp: 98.6, oxygen: 98 });
     const [vitalHistory, setVitalHistory] = useState([]);
     const [symptomQuery, setSymptomQuery] = useState("");
+    const socketRef = useRef(null);
 
     const fetchDashboardData = useCallback(async () => {
         try {
@@ -45,22 +47,33 @@ export default function PatientDashboard() {
                 API.get(`/patients/${user.id}/vitals`)
             ]);
             setRecentPrescriptions(Array.isArray(rxRes.data) ? rxRes.data.slice(0, 3) : []);
-            setUpcomingAppointments(Array.isArray(aptRes.data) ? aptRes.data.filter(a => new Date(a.appointmentTime) > new Date()).slice(0, 1) : []);
+            // Include all appointments, sort upcoming first
+            const allApts = Array.isArray(aptRes.data) ? aptRes.data : [];
+            const upcoming = allApts.filter(a => new Date(a.appointmentTime) > new Date()).sort((a,b) => new Date(a.appointmentTime) - new Date(b.appointmentTime));
+            setUpcomingAppointments(upcoming.slice(0, 1));
             setBillingInfo(Array.isArray(billRes.data) ? billRes.data : []);
-            setTimeline(Array.isArray(timelineRes.data) ? timelineRes.data.slice(0, 5) : []);
-            
-            if (vitalsRes.data && vitalsRes.data.length > 0) {
-                const latest = vitalsRes.data[0];
+            // Fix: timeline items use 'date' field, not 'timestamp'
+            const tl = Array.isArray(timelineRes.data) ? timelineRes.data : [];
+            setTimeline(tl.slice(0, 5));
+
+            if (Array.isArray(vitalsRes.data) && vitalsRes.data.length > 0) {
+                const latest = vitalsRes.data[vitalsRes.data.length - 1];
+                // Fix: backend stores 'oxygenSaturation', not 'oxygenLevel'
+                // Fix: bloodPressure is object {systolic, diastolic}
+                const bp = latest.bloodPressure;
+                const bpStr = bp && typeof bp === 'object'
+                    ? `${bp.systolic}/${bp.diastolic}`
+                    : (bp || "120/80");
                 setVitals({
                     heartRate: latest.heartRate || 72,
-                    oxygen: latest.oxygenLevel || 98,
-                    bp: latest.bloodPressure || "120/80",
+                    oxygen: latest.oxygenSaturation || latest.oxygenLevel || 98,
+                    bp: bpStr,
                     temp: latest.temperature || 98.6
                 });
-                setVitalHistory(vitalsRes.data.slice(0, 10).reverse().map(v => ({
+                setVitalHistory(vitalsRes.data.slice(0, 10).map(v => ({
                     time: new Date(v.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     hr: v.heartRate,
-                    ox: v.oxygenLevel
+                    ox: v.oxygenSaturation || v.oxygenLevel || 98
                 })));
             }
         } catch (error) {
@@ -72,6 +85,21 @@ export default function PatientDashboard() {
 
     useEffect(() => {
         if (user?.id) fetchDashboardData();
+    }, [user?.id, fetchDashboardData]);
+
+    // Real-time: listen for new prescriptions via Socket.IO
+    useEffect(() => {
+        const BACKEND = import.meta.env.VITE_API_URL
+            ? import.meta.env.VITE_API_URL.replace('/api', '')
+            : 'http://localhost:5000';
+        socketRef.current = socketIO(BACKEND, { transports: ['websocket', 'polling'] });
+        socketRef.current.on('new-prescription', ({ patientId }) => {
+            // Only refresh if the prescription is for this patient
+            if (String(patientId) === String(user?.id)) {
+                fetchDashboardData();
+            }
+        });
+        return () => { socketRef.current?.disconnect(); };
     }, [user?.id, fetchDashboardData]);
 
     const handleSOS = () => {
@@ -146,25 +174,30 @@ export default function PatientDashboard() {
                 {/* Left - Main Content */}
                 <div className="xl:col-span-8 space-y-8">
                     {/* Active Consultation Card */}
+                    {upcomingAppointments.length > 0 ? (
                     <div className="glass-card p-10 border-blue-500/20 relative overflow-hidden bg-blue-500/5 group">
                         <div className="hud-corner top-left" />
                         <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                             <div className="flex items-center gap-8">
                                 <div className="w-24 h-24 rounded-3xl bg-slate-900 flex items-center justify-center relative border border-white/10 group-hover:scale-105 transition-all">
-                                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=Sarah`} alt="D" className="w-20 h-20" />
+                                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${upcomingAppointments[0]?.doctor?.user?.fullName || 'doctor'}`} alt="D" className="w-20 h-20" />
                                     <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 border-4 border-slate-950" />
                                 </div>
                                 <div>
                                     <h3 className="text-3xl font-black text-white italic tracking-tighter mb-1 uppercase">Next Clinical Session</h3>
-                                    <p className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-4">Dr. Sarah Johnson // Cardiology Specialist</p>
+                                    <p className="text-sm font-bold text-blue-400 uppercase tracking-widest mb-4">
+                                        {upcomingAppointments[0]?.doctor?.user?.fullName || 'Your Doctor'} // {upcomingAppointments[0]?.doctor?.specialization || 'Specialist'}
+                                    </p>
                                     <div className="flex items-center gap-6">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-4 h-4 text-slate-500" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tomorrow, 10:00 AM</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                {new Date(upcomingAppointments[0]?.appointmentTime).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}, {new Date(upcomingAppointments[0]?.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4 text-slate-500" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration: 45m</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{upcomingAppointments[0]?.type || 'IN_PERSON'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -174,6 +207,18 @@ export default function PatientDashboard() {
                             </button>
                         </div>
                     </div>
+                    ) : (
+                    <div className="glass-card p-8 border-blue-500/10 bg-blue-500/5 flex items-center gap-6">
+                        <Calendar className="w-10 h-10 text-blue-400/30" />
+                        <div>
+                            <p className="text-sm font-black text-slate-500 uppercase tracking-widest">No Upcoming Appointments</p>
+                            <p className="text-[10px] text-slate-600 uppercase tracking-widest mt-1">Book a session via Doctor Directory</p>
+                        </div>
+                        <Link to="/patient/directory" className="ml-auto px-6 py-3 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-600 hover:text-white transition-all">
+                            Book Now
+                        </Link>
+                    </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Therapy Stream */}
@@ -263,12 +308,18 @@ export default function PatientDashboard() {
                             <Clock className="w-4 h-4 opacity-30" />
                         </h3>
                         <div className="space-y-8 relative pl-6 border-l border-white/5">
+                            {timeline.length === 0 && (
+                                <p className="text-[10px] text-slate-600 italic uppercase tracking-widest">No activity recorded yet.</p>
+                            )}
                             {timeline.map((e, i) => (
                                 <div key={i} className="relative">
                                     <div className="absolute -left-[31px] top-0 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1">{new Date(e.timestamp).toLocaleDateString()}</p>
-                                    <p className="text-xs font-bold text-white mb-0.5">{e.description}</p>
-                                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-tighter italic">{e.eventType} Executed</p>
+                                    {/* Fix: use e.date || e.timestamp */}
+                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1">
+                                        {new Date(e.date || e.timestamp || e.createdAt).toLocaleDateString()}
+                                    </p>
+                                    <p className="text-xs font-bold text-white mb-0.5">{e.description || e.title}</p>
+                                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-tighter italic">{e.eventType} Logged</p>
                                 </div>
                             ))}
                         </div>

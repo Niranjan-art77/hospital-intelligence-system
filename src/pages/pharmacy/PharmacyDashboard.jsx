@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../services/api";
 import { useToast } from "../../context/ToastContext";
@@ -11,22 +11,26 @@ import {
   Cpu, Sparkles, MessageSquare, FileText,
   TrendingUp, ArrowUpRight, ArrowDownRight,
   RefreshCcw, Layers, Bell, ShieldCheck,
-  Smartphone, Eye, Trash2, Edit3
+  Smartphone, Eye, Trash2, Edit3, Plus
 } from "lucide-react";
+import { io as socketIO } from "socket.io-client";
 
 export default function PharmacyDashboard() {
     const { user } = useAuth();
     const { addToast } = useToast();
-    const [activeTab, setActiveTab] = useState("console"); // console, inventory, flow, fiscal, alerts
+    const [activeTab, setActiveTab] = useState("console");
     const [prescriptions, setPrescriptions] = useState([]);
     const [inventory, setInventory] = useState([]);
     const [patients, setPatients] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("ALL"); // ALL, PENDING, VERIFIED
     const [alerts, setAlerts] = useState([]);
     const [selectedPrescription, setSelectedPrescription] = useState(null);
     const [isChecking, setIsChecking] = useState(false);
+    const [stockModal, setStockModal] = useState(null); // { item, newStock }
+    const socketRef = useRef(null);
     const [activityLog, setActivityLog] = useState([
         { id: 1, text: "Neural uplink established.", type: "system", time: "14:22" },
         { id: 2, text: "Stock levels synchronized with central node.", type: "info", time: "14:15" },
@@ -36,6 +40,23 @@ export default function PharmacyDashboard() {
     useEffect(() => {
         fetchInitialData();
     }, [activeTab]);
+
+    // Real-time: listen for new prescriptions
+    useEffect(() => {
+        const BACKEND = import.meta.env.VITE_API_URL
+            ? import.meta.env.VITE_API_URL.replace('/api', '')
+            : 'http://localhost:5000';
+        socketRef.current = socketIO(BACKEND, { transports: ['websocket', 'polling'] });
+        socketRef.current.on('new-prescription-pharmacy', (newRx) => {
+            setPrescriptions(prev => [{ ...newRx, id: newRx._id }, ...prev]);
+            logActivity(`New Protocol received from ${newRx.doctor?.user?.fullName || 'Doctor'} for ${newRx.patient?.user?.fullName || 'Patient'}`, 'urgent');
+            addToast({ type: 'info', title: 'NEW PROTOCOL RECEIVED', message: 'A new prescription has arrived in the stream.' });
+        });
+        socketRef.current.on('new-patient', (pat) => {
+            logActivity(`New patient registered: ${pat.fullName}`, 'info');
+        });
+        return () => { socketRef.current?.disconnect(); };
+    }, []);
 
     const fetchInitialData = async () => {
         setLoading(true);
@@ -47,7 +68,9 @@ export default function PharmacyDashboard() {
                 API.get("/pharmacy/stats"),
                 API.get("/pharmacy/alerts")
             ]);
-            setPrescriptions(preRes.data || []);
+            // Normalize prescriptions: backend returns populated objects
+            const rxList = (preRes.data || []).map(p => ({ ...p, id: p.id || p._id }));
+            setPrescriptions(rxList);
             setPatients(patRes.data || []);
             setInventory(invRes.data || []);
             setStats(statsRes.data || null);
@@ -64,44 +87,56 @@ export default function PharmacyDashboard() {
         setIsChecking(true);
         setTimeout(() => {
             setIsChecking(false);
+            // Patient name: populated prescriptions have patient as object
+            const patName = p.patient?.user?.fullName || p.patient?.name || 'Unknown';
             addToast({
                 type: "success",
                 title: "SYSTEM INTEGRITY VERIFIED",
                 message: `Prescription #${p.id} matches patient biometric profile.`
             });
-            logActivity(`Verified Protocol #${p.id} for ${patients.find(pat => pat.id === p.patientId)?.name}`, "success");
+            logActivity(`Verified Protocol #${p.id} for ${patName}`, "success");
         }, 2000);
     };
 
     const handleDispenseAndBill = async () => {
         if (!selectedPrescription) return;
-        
         try {
-            await API.post("/pharmacy/verify", { prescriptionId: selectedPrescription.id });
-            
-            const amount = selectedPrescription.items?.reduce((acc, item) => acc + (Math.random() * 500 + 100), 0).toFixed(2) || 500;
-            
+            await API.post("/pharmacy/verify", { prescriptionId: selectedPrescription.id || selectedPrescription._id });
+            // Calculate amount from items
+            const itemCount = selectedPrescription.items?.length || selectedPrescription.medications?.length || 1;
+            const amount = (itemCount * (Math.floor(Math.random() * 400) + 150)).toFixed(2);
+            // Patient ID from populated object
+            const patId = selectedPrescription.patient?._id || selectedPrescription.patient || selectedPrescription.patientId;
             await API.post("/billing/add", {
-                patientId: selectedPrescription.patientId,
-                amount: amount,
+                patientId: patId,
+                amount: parseFloat(amount),
                 description: `Pharmacy Dispensing: Protocol #${selectedPrescription.id}`
             });
-
             addToast({
                 type: "success",
                 title: "COMPOUND DISPENSED",
                 message: `Protocol finalized. Bill of ₹${amount} dispatched to patient.`
             });
-
             logActivity(`Dispensed Protocol #${selectedPrescription.id}. Fiscal record generated.`, "success");
-            setSelectedPrescription(null);
+            // Mark as verified in local state
+            setPrescriptions(prev => prev.map(p => p.id === selectedPrescription.id ? { ...p, status: 'VERIFIED' } : p));
+            setSelectedPrescription(prev => ({ ...prev, status: 'VERIFIED' }));
             fetchInitialData();
         } catch (error) {
-            addToast({
-                type: "error",
-                title: "DISPATCH ERROR",
-                message: "Could not finalize protocol. Check system logs."
-            });
+            addToast({ type: "error", title: "DISPATCH ERROR", message: "Could not finalize protocol. Check system logs." });
+        }
+    };
+
+    const handleUpdateStock = async () => {
+        if (!stockModal) return;
+        try {
+            await API.put(`/pharmacy/inventory/${stockModal.item._id}`, { stock: parseInt(stockModal.newStock) });
+            setInventory(prev => prev.map(i => i._id === stockModal.item._id ? { ...i, stock: parseInt(stockModal.newStock) } : i));
+            logActivity(`Stock updated: ${stockModal.item.medicineName} → ${stockModal.newStock} units`, 'success');
+            addToast({ type: 'success', title: 'STOCK UPDATED', message: `${stockModal.item.medicineName} stock set to ${stockModal.newStock} units.` });
+            setStockModal(null);
+        } catch (e) {
+            addToast({ type: 'error', title: 'UPDATE FAILED', message: 'Could not update stock level.' });
         }
     };
 
@@ -115,10 +150,28 @@ export default function PharmacyDashboard() {
         setActivityLog(prev => [newLog, ...prev.slice(0, 9)]);
     };
 
+    // Patient name resolution: handle both populated objects and flat IDs
+    const getPatientName = (p) => {
+        if (p.patient?.user?.fullName) return p.patient.user.fullName;
+        if (p.patient?.name) return p.patient.name;
+        if (typeof p.patient === 'string') {
+            const found = patients.find(pat => pat._id === p.patient || pat.id === p.patient);
+            return found?.name || found?.user?.fullName || 'Unknown';
+        }
+        return 'Unknown Entity';
+    };
+
+    const getDoctorName = (p) => {
+        if (p.doctor?.user?.fullName) return p.doctor.user.fullName;
+        if (typeof p.doctor === 'string') return `Dr. #${p.doctor.slice(-4)}`;
+        return 'Authorized MD';
+    };
+
     const filteredPrescriptions = prescriptions.filter(p => {
-        const patientName = patients.find(pat => pat.id === p.patientId)?.name || "";
-        return p.id.toString().includes(searchTerm) || 
-               patientName.toLowerCase().includes(searchTerm.toLowerCase());
+        const name = getPatientName(p).toLowerCase();
+        const matchSearch = p.id?.toString().includes(searchTerm) || name.includes(searchTerm.toLowerCase());
+        const matchStatus = statusFilter === 'ALL' || p.status === statusFilter;
+        return matchSearch && matchStatus;
     });
 
     const filteredInventory = inventory.filter(item => 
@@ -206,6 +259,23 @@ export default function PharmacyDashboard() {
                         </div>
                     </div>
 
+                    {/* Quick Status Filters */}
+                    {activeTab === 'console' && (
+                        <div className="flex items-center gap-2">
+                            {['ALL', 'PENDING', 'VERIFIED'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setStatusFilter(f)}
+                                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border ${
+                                        statusFilter === f
+                                            ? 'bg-emerald-500 text-[#020617] border-emerald-500'
+                                            : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
+                                    }`}
+                                >{f}</button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Dynamic View Port */}
                     <div className="flex-1 overflow-y-auto custom-scroll pr-2">
                         <AnimatePresence mode="wait">
@@ -224,13 +294,13 @@ export default function PharmacyDashboard() {
                                     {loading ? (
                                         <LoadingState />
                                     ) : filteredPrescriptions.length === 0 ? (
-                                        <EmptyState icon={Box} text="No active protocols detected in this sector." />
+                                        <EmptyState icon={Box} text="No protocols detected. Prescriptions will appear here in real-time." />
                                     ) : (
                                         filteredPrescriptions.map((p, i) => (
                                             <PrescriptionCard 
-                                                key={p.id} 
+                                                key={p.id || i} 
                                                 p={p} 
-                                                patient={patients.find(pat => pat.id === p.patientId)}
+                                                patientName={getPatientName(p)}
                                                 isSelected={selectedPrescription?.id === p.id}
                                                 onClick={() => setSelectedPrescription(p)}
                                                 delay={i * 0.05}
@@ -261,7 +331,12 @@ export default function PharmacyDashboard() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {loading ? <LoadingState /> : filteredInventory.map((item, i) => (
-                                            <InventoryCard key={item.id} item={item} delay={i * 0.03} />
+                                            <InventoryCard 
+                                                key={item._id || item.id || i} 
+                                                item={item} 
+                                                delay={i * 0.03} 
+                                                onUpdateStock={() => setStockModal({ item, newStock: item.stock })}
+                                            />
                                         ))}
                                     </div>
                                 </motion.div>
@@ -474,14 +549,16 @@ export default function PharmacyDashboard() {
                                                 </div>
                                                 <div>
                                                     <p className="text-md font-black text-white uppercase italic tracking-tighter leading-none mb-1">
-                                                        {patients.find(pat => pat.id === selectedPrescription.patientId)?.name || "Unknown Entity"}
+                                                        {getPatientName(selectedPrescription)}
                                                     </p>
-                                                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">ID: {selectedPrescription.patientId.slice(0, 16)}...</p>
+                                                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
+                                                        {selectedPrescription.diagnosis || 'No diagnosis recorded'}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
-                                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Blood: <span className="text-slate-300">{patients.find(pat => pat.id === selectedPrescription.patientId)?.bloodGroup || "N/A"}</span></div>
-                                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Age: <span className="text-slate-300">{patients.find(pat => pat.id === selectedPrescription.patientId)?.age || "N/A"}</span></div>
+                                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Blood: <span className="text-slate-300">{selectedPrescription.patient?.bloodGroup || 'N/A'}</span></div>
+                                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Age: <span className="text-slate-300">{selectedPrescription.patient?.age || 'N/A'}</span></div>
                                             </div>
                                         </div>
 
@@ -493,7 +570,7 @@ export default function PharmacyDashboard() {
                                                 </div>
                                                 <div>
                                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Authorizing MD</p>
-                                                    <p className="text-[10px] font-black text-white uppercase tracking-tighter italic">Dr. Neuro Core-7</p>
+                                                    <p className="text-[10px] font-black text-white uppercase tracking-tighter italic">{getDoctorName(selectedPrescription)}</p>
                                                 </div>
                                             </div>
                                             <button className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
@@ -582,13 +659,56 @@ export default function PharmacyDashboard() {
                         </div>
                     </div>
                 </section>
-            </main>
+            {/* Stock Update Modal */}
+            <AnimatePresence>
+                {stockModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+                        onClick={() => setStockModal(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="glass-card p-8 border-emerald-500/30 bg-[#020617] w-full max-w-md"
+                        >
+                            <h3 className="text-lg font-black text-white uppercase italic tracking-tighter mb-2">Update Stock Level</h3>
+                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6">{stockModal.item.medicineName}</p>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Current Stock</label>
+                                    <p className="text-2xl font-black text-white mt-1">{stockModal.item.stock} <span className="text-[10px] text-slate-500">units</span></p>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">New Stock Level</label>
+                                    <input
+                                        type="number"
+                                        value={stockModal.newStock}
+                                        onChange={e => setStockModal(prev => ({ ...prev, newStock: e.target.value }))}
+                                        className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-black focus:outline-none focus:border-emerald-500/50"
+                                        min="0"
+                                    />
+                                </div>
+                                <div className="flex gap-3 mt-6">
+                                    <button onClick={() => setStockModal(null)} className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white">Cancel</button>
+                                    <button onClick={handleUpdateStock} className="flex-1 py-3 bg-emerald-500 text-[#020617] rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all">Confirm Update</button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
 
 // Sub-Components
-function PrescriptionCard({ p, patient, isSelected, onClick, delay }) {
+function PrescriptionCard({ p, patientName, isSelected, onClick, delay }) {
+    const meds = p.items || p.medications || [];
     return (
         <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -605,11 +725,11 @@ function PrescriptionCard({ p, patient, isSelected, onClick, delay }) {
                     </div>
                     <div>
                         <h4 className="text-md font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
-                            Protocol #{p.id}
+                            Protocol #{p.id || p._id}
                             {p.status === 'VERIFIED' && <ShieldCheck size={12} className="text-emerald-500" />}
                         </h4>
                         <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                            Subject: {patient?.name || "Unidentified Entity"}
+                            Subject: {patientName || "Unidentified Entity"}
                         </p>
                     </div>
                 </div>
@@ -622,24 +742,30 @@ function PrescriptionCard({ p, patient, isSelected, onClick, delay }) {
             </div>
             {/* Quick Medicine Preview */}
             <div className="mt-3 flex gap-2 overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity">
-                {p.items?.slice(0, 3).map((item, idx) => (
+                {meds.slice(0, 3).map((item, idx) => (
                     <span key={idx} className="text-[7px] font-black text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5 truncate max-w-[100px]">
-                        {item.medicineName}
+                        {item.medicineName || item.name}
                     </span>
                 ))}
+                {p.diagnosis && <span className="text-[7px] font-black text-blue-400/50 bg-blue-500/5 px-2 py-0.5 rounded border border-blue-500/10 truncate max-w-[120px]">{p.diagnosis}</span>}
             </div>
         </motion.div>
     );
 }
 
-function InventoryCard({ item, delay }) {
-    const isLow = item.stock < item.lowStockThreshold;
+function InventoryCard({ item, delay, onUpdateStock }) {
+    const isLow = (item.stock || 0) < (item.lowStockThreshold || 50);
+    const expDate = item.expiryDate && item.expiryDate !== 'N/A' ? new Date(item.expiryDate) : null;
+    const daysToExpiry = expDate ? Math.ceil((expDate - new Date()) / (1000*60*60*24)) : null;
+    const isExpiringSoon = daysToExpiry !== null && daysToExpiry < 60;
     return (
         <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay }}
-            className={`glass-card p-5 border-white/5 hover:border-white/10 transition-all relative group overflow-hidden ${isLow ? 'bg-amber-500/5' : ''}`}
+            className={`glass-card p-5 border-white/5 hover:border-white/10 transition-all relative group overflow-hidden ${
+                isLow ? 'bg-amber-500/5 border-amber-500/10' : isExpiringSoon ? 'bg-rose-500/5 border-rose-500/10' : ''
+            }`}
         >
             <div className={`absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl -mr-8 -mt-8 ${isLow ? 'bg-amber-500/10' : 'bg-emerald-500/5'}`} />
             
@@ -647,15 +773,17 @@ function InventoryCard({ item, delay }) {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLow ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-400'}`}>
                     <Box size={18} />
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end gap-1">
                     <p className="text-[14px] font-black text-white italic tracking-tighter">₹{item.price}</p>
                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">per unit</p>
+                    {isLow && <span className="text-[7px] font-black text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest">⚠ LOW STOCK</span>}
+                    {isExpiringSoon && <span className={`text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest ${daysToExpiry < 30 ? 'text-rose-500 bg-rose-500/10' : 'text-orange-400 bg-orange-500/10'}`}>EXP {daysToExpiry}D</span>}
                 </div>
             </div>
 
             <div className="mb-4">
                 <h4 className="text-sm font-black text-white uppercase italic tracking-tighter mb-1 truncate">{item.medicineName}</h4>
-                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] truncate">{item.description || 'No specialized description provided.'}</p>
+                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] truncate">{item.category}</p>
             </div>
 
             <div className="space-y-2">
@@ -672,12 +800,15 @@ function InventoryCard({ item, delay }) {
                 </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all">
-                    <Edit3 size={12} />
+            <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+                <button 
+                    onClick={(e) => { e.stopPropagation(); onUpdateStock && onUpdateStock(); }}
+                    className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[8px] font-black text-emerald-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-[#020617] transition-all"
+                >
+                    + Update Stock
                 </button>
                 <div className="text-[7px] font-black text-slate-600 uppercase tracking-[0.3em]">
-                    EXP: {item.expiryDate || 'PERPETUAL'}
+                    EXP: {item.expiryDate || 'N/A'}
                 </div>
             </div>
         </motion.div>

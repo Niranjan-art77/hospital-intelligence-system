@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../services/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { io as socketIO } from "socket.io-client";
 import { 
   Pill, Plus, Trash2, Send, CheckCircle, 
   AlertTriangle, User, Calendar, Info, Sparkles,
@@ -65,7 +66,7 @@ export default function PrescriptionManager() {
             return;
         }
 
-        const validMeds = medicines.filter(m => m.medicineName && m.dosage && m.days);
+    const validMeds = medicines.filter(m => m.medicineName && m.dosage && m.days);
         if (validMeds.length === 0) {
             setError("PROTOCOL ERROR: Minimum one chemical compound required.");
             setLoading(false);
@@ -74,15 +75,16 @@ export default function PrescriptionManager() {
 
         try {
             const payload = {
-                patientId: form.patientId,
-                doctorId: user?.id || 1,
-                appointmentId: form.appointmentId,
+                patient: form.patientId,   // backend uses 'patient' field
+                doctor: user?.id || '',
+                appointmentId: form.appointmentId === 'DIRECT' ? null : form.appointmentId,
                 diagnosis: form.diagnosis,
                 notes: form.notes,
-                items: validMeds
+                items: validMeds,
+                medications: validMeds  // include both for compatibility
             };
 
-            await API.post("/prescriptions/create", payload);
+            await API.post("/prescriptions", payload);
 
             setSuccess("BIOMETRIC PROTOCOL BROADCAST: Pharmacy Network Notified.");
             setForm({ patientId: "", appointmentId: "", diagnosis: "", notes: "" });
@@ -195,23 +197,29 @@ export default function PrescriptionManager() {
                                 >
                                     <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Subject Biometrics</h4>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {patients.find(p => String(p.id) === String(form.patientId)) ? (
+                                        {patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)) ? (
                                             <>
                                                 <div className="space-y-1">
                                                     <p className="text-[8px] font-black text-slate-600 uppercase">Age / Gender</p>
-                                                    <p className="text-xs font-black text-white">{patients.find(p => String(p.id) === String(form.patientId)).age} / {patients.find(p => String(p.id) === String(form.patientId)).gender || "N/A"}</p>
+                                                    <p className="text-xs font-black text-white">
+                                                        {patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)).age || 'N/A'} / {patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)).gender || "N/A"}
+                                                    </p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-[8px] font-black text-slate-600 uppercase">Blood Group</p>
-                                                    <p className="text-xs font-black text-white">{patients.find(p => String(p.id) === String(form.patientId)).bloodGroup || "N/A"}</p>
+                                                    <p className="text-xs font-black text-white">{patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)).bloodGroup || "N/A"}</p>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Chronic Conditions</p>
-                                                    <p className="text-xs font-black text-rose-400 truncate">{patients.find(p => String(p.id) === String(form.patientId)).chronicConditions || "None Detected"}</p>
+                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Conditions</p>
+                                                    <p className="text-xs font-black text-rose-400 truncate">
+                                                        {(() => { const pt = patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)); return Array.isArray(pt?.conditions) ? pt.conditions.join(', ') || 'None' : pt?.chronicConditions || pt?.conditions || 'None Detected'; })()}
+                                                    </p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-[8px] font-black text-slate-600 uppercase">Allergies</p>
-                                                    <p className="text-xs font-black text-amber-400 truncate">{patients.find(p => String(p.id) === String(form.patientId)).allergies || "None Detected"}</p>
+                                                    <p className="text-xs font-black text-amber-400 truncate">
+                                                        {(() => { const pt = patients.find(p => String(p.id) === String(form.patientId) || String(p._id) === String(form.patientId)); return Array.isArray(pt?.allergies) ? pt.allergies.join(', ') || 'None' : pt?.allergies || 'None Detected'; })()}
+                                                    </p>
                                                 </div>
                                             </>
                                         ) : <p className="text-[10px] text-slate-500">Retrieving patterns...</p>}

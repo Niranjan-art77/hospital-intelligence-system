@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Calendar, Clock, FileText, Pill, AlertCircle,
@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import API from '../../services/api';
+import { io as socketIO } from 'socket.io-client';
 import { 
     LineChart, Line, BarChart, Bar, XAxis, YAxis, 
     CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -33,9 +34,30 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
     });
     const [showProfile, setShowProfile] = useState(false);
     const [bills, setBills] = useState([]);
+    const socketRef = useRef(null);
 
     useEffect(() => {
         fetchData();
+    }, []);
+
+    // Real-time: listen for new patients and prescriptions
+    useEffect(() => {
+        const BACKEND = import.meta.env.VITE_API_URL
+            ? import.meta.env.VITE_API_URL.replace('/api', '')
+            : 'http://localhost:5000';
+        socketRef.current = socketIO(BACKEND, { transports: ['websocket', 'polling'] });
+        socketRef.current.on('new-patient', (newPat) => {
+            setPatients(prev => {
+                if (prev.find(p => p._id === newPat._id || p.id === newPat._id)) return prev;
+                return [...prev, { ...newPat, id: newPat._id, name: newPat.fullName }];
+            });
+            addToast({ type: 'info', title: 'NEW SUBJECT SYNCHRONIZED', message: `${newPat.fullName} has registered and entered the system.` });
+        });
+        socketRef.current.on('new-prescription', () => {
+            // Refresh billing ledger silently
+            API.get('/billing/all').then(r => setBills(r.data || [])).catch(() => {});
+        });
+        return () => { socketRef.current?.disconnect(); };
     }, []);
 
     const fetchData = async () => {
@@ -73,12 +95,13 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
             // 2. Create Prescription if medicines added
             const validMeds = consultation.medicines.filter(m => m.medicineName && m.dosage);
             if (validMeds.length > 0) {
-                await API.post("/prescriptions/add", {
-                    patientId: selectedPatient.id,
-                    doctorId: user?.id || 1,
+                await API.post("/prescriptions", {
+                    patient: selectedPatient.id || selectedPatient._id,
+                    doctor: user?.id || '',
                     diagnosis: consultation.problem,
                     notes: consultation.resolution,
-                    items: validMeds
+                    items: validMeds,
+                    medications: validMeds
                 });
             }
 
