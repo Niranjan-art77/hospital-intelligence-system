@@ -42,3 +42,28 @@ def delete_medicine(id):
     conn.commit()
     conn.close()
     return jsonify({"message": "Medicine deleted successfully"})
+
+@pharmacy_bp.route('/prescriptions', methods=['GET'])
+def get_all_prescriptions():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM prescriptions ORDER BY createdAt DESC')
+    prescriptions = []
+    for row in c.fetchall():
+        p = dict(row)
+        c.execute('SELECT * FROM prescriptions_items WHERE prescriptionId = ?', (p['id'],))
+        p['items'] = [dict(item) for item in c.fetchall()]
+        prescriptions.append(p)
+    conn.close()
+    return jsonify(prescriptions)
+
+@pharmacy_bp.route('/verify', methods=['POST'])
+def verify_prescription():
+    data = request.json
+    prescription_id = data.get('prescriptionId')
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('UPDATE prescriptions SET status = "VERIFIED" WHERE id = ?', (prescription_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "message": "Prescription verified"})

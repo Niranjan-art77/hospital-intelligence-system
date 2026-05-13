@@ -6,7 +6,7 @@ import {
     Droplets, Star, Award, MessageCircle, Video, Phone,
     Search, Filter, Download, Share2, Eye, Edit2, Plus,
     X, ChevronRight, ChevronDown, Zap, Target, BarChart3,
-    LineChart, PieChart, Stethoscope, Hospital, Ambulance,
+    LineChart as LineChartIcon, PieChart as PieChartIcon, Stethoscope, Hospital, Ambulance,
     Shield, Settings, Bell, LogOut, User, Mail, MapPin,
     RefreshCw, CheckCircle, XCircle, AlertTriangle,
     Patient, Doctor, Schedule, Clipboard, FileMedical,
@@ -793,22 +793,22 @@ export default function EnhancedDoctorDashboard() {
                     </div>
                 </motion.div>
 
-                {/* Tabs */}
-                <div className="flex gap-2 mb-8 border-b border-white/10">
+                <div className="flex gap-2 mb-8 border-b border-white/10 overflow-x-auto custom-scroll">
                     {[
                         { id: 'overview', label: 'Overview', icon: BarChart3 },
                         { id: 'queue', label: 'Patient Queue', icon: Users },
                         { id: 'appointments', label: 'Appointments', icon: Calendar },
                         { id: 'reports', label: 'Reports', icon: FileText },
-                        { id: 'prescriptions', label: 'Prescriptions', icon: Pill }
+                        { id: 'prescriptions', label: 'Prescriptions', icon: Pill },
+                        { id: 'analytics', label: 'Analytics', icon: LineChartIcon },
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-3 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${
+                            className={`px-6 py-4 font-black text-[10px] uppercase tracking-widest transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
                                 activeTab === tab.id
-                                    ? 'text-blue-400 border-blue-400'
-                                    : 'text-slate-400 border-transparent hover:text-white'
+                                    ? 'text-blue-400 border-blue-400 bg-blue-400/5'
+                                    : 'text-slate-500 border-transparent hover:text-white hover:bg-white/5'
                             }`}
                         >
                             <tab.icon className="w-4 h-4" />

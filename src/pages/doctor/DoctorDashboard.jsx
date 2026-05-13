@@ -1,5 +1,3 @@
-import DoctorIntelligenceCenter from "./DoctorIntelligenceCenter";
-
 export default function DoctorDashboard() {
-    return <DoctorIntelligenceCenter />;
+    return <div style={{ color: "white", padding: "100px", fontSize: "3rem" }}>DEBUG: DOCTOR DASHBOARD MOUNTED</div>;
 }

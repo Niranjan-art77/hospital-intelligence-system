@@ -107,6 +107,7 @@ def init_db():
             doctorId TEXT NOT NULL,
             diagnosis TEXT,
             notes TEXT,
+            status TEXT DEFAULT 'PENDING',
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')

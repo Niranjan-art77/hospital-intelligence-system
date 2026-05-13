@@ -29,7 +29,7 @@ import StaffDashboard from "./pages/staff/StaffDashboard";
 
 // Doctor pages
 import DoctorLayout from "./layouts/DoctorLayout";
-import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import DoctorDashboard from "./pages/doctor/EnhancedDoctorDashboard";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import PrescriptionManager from "./pages/doctor/PrescriptionManager";

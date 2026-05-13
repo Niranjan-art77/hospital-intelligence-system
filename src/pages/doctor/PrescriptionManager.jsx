@@ -5,15 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Pill, Plus, Trash2, Send, CheckCircle, 
   AlertTriangle, User, Calendar, Info, Sparkles,
-  ChevronRight, Brain, Zap
+  ChevronRight, Brain, Zap, Shield
 } from 'lucide-react';
 
 export default function PrescriptionManager() {
     const { user } = useAuth();
     const [patients, setPatients] = useState([]);
     const [appointments, setAppointments] = useState([]);
-    const [form, setForm] = useState({ patientId: "", appointmentId: "" });
-    const [medicines, setMedicines] = useState([{ medicineName: "", dosage: "", days: "", notes: "" }]);
+    const [form, setForm] = useState({ patientId: "", appointmentId: "", diagnosis: "", notes: "" });
+    const [medicines, setMedicines] = useState([{ medicineName: "", dosage: "", days: "", morning: true, afternoon: false, night: true, notes: "" }]);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ export default function PrescriptionManager() {
     };
 
     const addMedicineField = () => {
-        setMedicines([...medicines, { medicineName: "", dosage: "", days: "", notes: "" }]);
+        setMedicines([...medicines, { medicineName: "", dosage: "", days: "", morning: true, afternoon: false, night: true, notes: "" }]);
     };
 
     const removeMedicineField = (index) => {
@@ -74,13 +74,15 @@ export default function PrescriptionManager() {
                 patientId: form.patientId,
                 doctorId: user?.id || 1,
                 appointmentId: form.appointmentId,
+                diagnosis: form.diagnosis,
+                notes: form.notes,
                 items: validMeds
             };
 
             await API.post("/prescriptions/create", payload);
 
             setSuccess("BIOMETRIC PROTOCOL BROADCAST: Pharmacy Network Notified.");
-            setForm({ patientId: "", appointmentId: "" });
+            setForm({ patientId: "", appointmentId: "", diagnosis: "", notes: "" });
             setMedicines([{ medicineName: "", dosage: "", days: "", notes: "" }]);
             setTimeout(() => setSuccess(""), 5000);
         } catch (err) {
@@ -171,13 +173,68 @@ export default function PrescriptionManager() {
                                             className="w-full bg-slate-900 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer"
                                         >
                                             <option value="">-- Select Session --</option>
-                                            {appointments.map(a => (
+                                            {appointments.filter(a => a.patientId === form.patientId).map(a => (
                                                 <option key={a.id} value={a.id}>
                                                     ID: {a.id} // {new Date(a.appointmentTime).toLocaleDateString()}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            {form.patientId && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="p-6 bg-purple-500/5 border border-purple-500/10 rounded-2xl space-y-4"
+                                >
+                                    <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Subject Biometrics</h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {patients.find(p => String(p.id) === String(form.patientId)) ? (
+                                            <>
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Age / Gender</p>
+                                                    <p className="text-xs font-black text-white">{patients.find(p => String(p.id) === String(form.patientId)).age} / {patients.find(p => String(p.id) === String(form.patientId)).gender || "N/A"}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Blood Group</p>
+                                                    <p className="text-xs font-black text-white">{patients.find(p => String(p.id) === String(form.patientId)).bloodGroup || "N/A"}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Chronic Conditions</p>
+                                                    <p className="text-xs font-black text-rose-400 truncate">{patients.find(p => String(p.id) === String(form.patientId)).chronicConditions || "None Detected"}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[8px] font-black text-slate-600 uppercase">Allergies</p>
+                                                    <p className="text-xs font-black text-amber-400 truncate">{patients.find(p => String(p.id) === String(form.patientId)).allergies || "None Detected"}</p>
+                                                </div>
+                                            </>
+                                        ) : <p className="text-[10px] text-slate-500">Retrieving patterns...</p>}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Clinical Diagnosis</label>
+                                    <input 
+                                        type="text" 
+                                        value={form.diagnosis} 
+                                        onChange={e => setForm({ ...form, diagnosis: e.target.value })}
+                                        placeholder="E.g. Acute Viral Infection"
+                                        className="w-full bg-slate-900 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Doctor's Observations</label>
+                                    <input 
+                                        type="text" 
+                                        value={form.notes} 
+                                        onChange={e => setForm({ ...form, notes: e.target.value })}
+                                        placeholder="Additional instructions..."
+                                        className="w-full bg-slate-900 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all"
+                                    />
                                 </div>
                             </div>
 
@@ -234,14 +291,31 @@ export default function PrescriptionManager() {
                                                     className="w-full bg-transparent border-b border-white/10 py-2 text-sm text-white focus:outline-none focus:border-purple-500 transition-all"
                                                 />
                                             </div>
-                                            <div className="md:col-span-3 space-y-1">
-                                                <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Usage Vector</label>
+                                            <div className="md:col-span-1 space-y-1">
+                                                <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest">M</label>
                                                 <input 
-                                                    type="text" 
-                                                    placeholder="After Meals" 
-                                                    value={med.notes} 
-                                                    onChange={e => handleMedicineChange(index, "notes", e.target.value)}
-                                                    className="w-full bg-transparent border-b border-white/10 py-2 text-sm text-white focus:outline-none focus:border-purple-500 transition-all"
+                                                    type="checkbox" 
+                                                    checked={med.morning} 
+                                                    onChange={e => handleMedicineChange(index, "morning", e.target.checked)}
+                                                    className="w-4 h-4 rounded border-white/10 bg-slate-800 text-purple-500 focus:ring-purple-500"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-1 space-y-1">
+                                                <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest">A</label>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={med.afternoon} 
+                                                    onChange={e => handleMedicineChange(index, "afternoon", e.target.checked)}
+                                                    className="w-4 h-4 rounded border-white/10 bg-slate-800 text-purple-500 focus:ring-purple-500"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-1 space-y-1">
+                                                <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest">N</label>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={med.night} 
+                                                    onChange={e => handleMedicineChange(index, "night", e.target.checked)}
+                                                    className="w-4 h-4 rounded border-white/10 bg-slate-800 text-purple-500 focus:ring-purple-500"
                                                 />
                                             </div>
                                             <div className="md:col-span-1 flex items-end justify-end">
