@@ -29,7 +29,7 @@ import StaffDashboard from "./pages/staff/StaffDashboard";
 
 // Doctor pages
 import DoctorLayout from "./layouts/DoctorLayout";
-import DoctorDashboard from "./pages/doctor/EnhancedDoctorDashboard";
+import DoctorDashboard from "./pages/doctor/DoctorCommandCenter";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import PrescriptionManager from "./pages/doctor/PrescriptionManager";
@@ -138,7 +138,9 @@ export default function App() {
           <Route index element={<DoctorDashboard />} />
           <Route path="patients" element={<DoctorPatients />} />
           <Route path="appointments" element={<DoctorAppointments />} />
+          <Route path="consultation" element={<DoctorDashboard activeTab="consultation" />} />
           <Route path="prescriptions" element={<PrescriptionManager />} />
+          <Route path="billing" element={<DoctorDashboard activeTab="billing" />} />
           <Route path="messages" element={<DoctorMessages />} />
           <Route path="performance" element={<DoctorPerformance />} />
           <Route path="emergency-response" element={<EmergencyResponseMode />} />

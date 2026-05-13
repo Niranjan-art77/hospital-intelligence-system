@@ -6,17 +6,18 @@ import Chatbot from "../components/Chatbot";
 import { 
     LayoutDashboard, Users, Calendar, Pill, 
     MessageSquare, TrendingUp, LogOut, Search,
-    Shield, Activity, Bell, Settings, Command
+    Shield, Activity, Bell, Settings, Command,
+    Stethoscope, DollarSign
 } from "lucide-react";
 import "./DoctorLayout.css";
 
 const navItems = [
     { to: "/doctor", icon: <LayoutDashboard size={18} />, label: "Command Center", end: true },
-    { to: "/doctor/patients", icon: <Users size={18} />, label: "Bio-Profiles" },
+    { to: "/doctor/patients", icon: <Users size={18} />, label: "Patient Archives" },
     { to: "/doctor/appointments", icon: <Calendar size={18} />, label: "Clinical Queue" },
-    { to: "/doctor/prescriptions", icon: <Pill size={18} />, label: "Protocols" },
-    { to: "/doctor/messages", icon: <MessageSquare size={18} />, label: "Neural Link" },
-    { to: "/doctor/performance", icon: <TrendingUp size={18} />, label: "Metrics" },
+    { to: "/doctor/consultation", icon: <Stethoscope size={18} />, label: "Consultation HUD" },
+    { to: "/doctor/prescriptions", icon: <Pill size={18} />, label: "Medical Protocols" },
+    { to: "/doctor/billing", icon: <DollarSign size={18} />, label: "Financial Node" },
 ];
 
 export default function DoctorLayout() {

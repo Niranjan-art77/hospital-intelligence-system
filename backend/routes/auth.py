@@ -41,7 +41,7 @@ def register():
         
         # If doctor, also insert into doctors table
         if role == 'DOCTOR':
-            c.execute('INSERT INTO doctors (id, userId, specialty) VALUES (?, ?, ?)', (str(uuid.uuid4()), user_id, 'General Medicine'))
+            c.execute('INSERT INTO doctors (id, userId, specialty) VALUES (?, ?, ?)', (str(uuid.uuid4()), user_id, data.get('specialty', 'General Medicine')))
             
         conn.commit()
         conn.close()

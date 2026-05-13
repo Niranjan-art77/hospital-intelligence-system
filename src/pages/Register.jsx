@@ -13,7 +13,8 @@ export default function Register() {
         bloodGroup: "",
         allergies: "",
         chronicConditions: "",
-        insuranceProvider: ""
+        insuranceProvider: "",
+        specialty: ""
     });
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -177,6 +178,30 @@ export default function Register() {
                                 />
                             </div>
                         </>
+                    )}
+
+                    {formData.role === "DOCTOR" && (
+                        <div className="md:col-span-2">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 ml-1">Clinical Specialty</label>
+                            <select
+                                className="input-tech w-full px-6 py-4 rounded-xl text-white font-bold bg-[#0f172a] border border-white/10"
+                                value={formData.specialty}
+                                onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                                required
+                            >
+                                <option value="">-- Select Vector --</option>
+                                <option value="Neurology">Neurology</option>
+                                <option value="Cardiology">Cardiology</option>
+                                <option value="Pediatrics">Pediatrics</option>
+                                <option value="Orthopedics">Orthopedics</option>
+                                <option value="Gynecology">Gynecology</option>
+                                <option value="Dermatology">Dermatology</option>
+                                <option value="Oncology">Oncology</option>
+                                <option value="Psychiatry">Psychiatry</option>
+                                <option value="Gastroenterology">Gastroenterology</option>
+                                <option value="Ophthalmology">Ophthalmology</option>
+                            </select>
+                        </div>
                     )}
 
                     <button
