@@ -6,7 +6,7 @@ import {
     User, Search, Filter, Plus, ChevronRight, Zap,
     Target, BarChart3, Stethoscope, Heart, MessageSquare,
     DollarSign, CheckCircle, XCircle, MoreVertical,
-    Send, Info, Sparkles
+    Send, Info, Sparkles, Pill, Trash2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -25,7 +25,12 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
     const [patients, setPatients] = useState([]);
     const [appointments, setAppointments] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
-    const [consultation, setConsultation] = useState({ problem: "", resolution: "", billingAmount: 0 });
+    const [consultation, setConsultation] = useState({ 
+        problem: "", 
+        resolution: "", 
+        billingAmount: 500,
+        medicines: [{ medicineName: "", dosage: "", morning: true, afternoon: false, night: true }]
+    });
     const [showProfile, setShowProfile] = useState(false);
     const [bills, setBills] = useState([]);
 
@@ -55,12 +60,25 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
         if (!selectedPatient) return addToast({ type: "error", title: "ERROR", message: "No patient selected." });
         
         try {
-            // Create Billing Record
+            setLoading(true);
+            // 1. Create Billing Record
             if (consultation.billingAmount > 0) {
                 await API.post("/billing/add", {
                     patientId: selectedPatient.id,
                     amount: consultation.billingAmount,
-                    description: `Consultation: ${consultation.resolution}`
+                    description: `Consultation + Pharmacy Protocol: ${consultation.resolution}`
+                });
+            }
+
+            // 2. Create Prescription if medicines added
+            const validMeds = consultation.medicines.filter(m => m.medicineName && m.dosage);
+            if (validMeds.length > 0) {
+                await API.post("/prescriptions/add", {
+                    patientId: selectedPatient.id,
+                    doctorId: user?.id || 1,
+                    diagnosis: consultation.problem,
+                    notes: consultation.resolution,
+                    items: validMeds
                 });
             }
 
@@ -69,11 +87,38 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
                 title: "CONSULTATION RESOLVED",
                 message: "Biometric protocols updated and billing dispatched."
             });
-            setConsultation({ problem: "", resolution: "", billingAmount: 0 });
+            setConsultation({ 
+                problem: "", 
+                resolution: "", 
+                billingAmount: 500,
+                medicines: [{ medicineName: "", dosage: "", morning: true, afternoon: false, night: true }]
+            });
             setActiveTab('overview');
+            fetchData();
         } catch (err) {
             addToast({ type: "error", title: "UPLINK FAILED", message: "Could not finalize consultation." });
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const addMedicine = () => {
+        setConsultation({
+            ...consultation,
+            medicines: [...consultation.medicines, { medicineName: "", dosage: "", morning: true, afternoon: false, night: true }]
+        });
+    };
+
+    const removeMedicine = (index) => {
+        const newMeds = [...consultation.medicines];
+        newMeds.splice(index, 1);
+        setConsultation({ ...consultation, medicines: newMeds });
+    };
+
+    const updateMedicine = (index, field, value) => {
+        const newMeds = [...consultation.medicines];
+        newMeds[index][field] = value;
+        setConsultation({ ...consultation, medicines: newMeds });
     };
 
     const solvedCases = appointments.filter(a => a.status === 'COMPLETED').length;
@@ -291,6 +336,68 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
                                                 placeholder="Provide resolution or treatment advice..."
                                                 className="w-full bg-slate-900 border border-white/10 rounded-2xl p-6 text-white text-sm font-medium focus:border-emerald-500/50 transition-all min-h-[120px]"
                                             />
+                                        </div>
+
+                                        {/* Biochemical Prescription Section */}
+                                        <div className="space-y-6 pt-4 border-t border-white/5">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                                                    <Pill size={14} /> Biochemical Protocol
+                                                </h4>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={addMedicine}
+                                                    className="px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[9px] font-black uppercase rounded-xl hover:bg-cyan-500/20 transition-all"
+                                                >
+                                                    + Add Compound
+                                                </button>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                {consultation.medicines.map((med, idx) => (
+                                                    <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-5 bg-slate-950/50 rounded-2xl border border-white/5 group/med hover:border-cyan-500/20 transition-all">
+                                                        <div className="md:col-span-5">
+                                                            <input 
+                                                                placeholder="Medicine Name"
+                                                                className="w-full bg-transparent border-b border-white/10 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                                                                value={med.medicineName}
+                                                                onChange={(e) => updateMedicine(idx, 'medicineName', e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-3">
+                                                            <input 
+                                                                placeholder="Dosage (e.g. 500mg)"
+                                                                className="w-full bg-transparent border-b border-white/10 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                                                                value={med.dosage}
+                                                                onChange={(e) => updateMedicine(idx, 'dosage', e.target.value)}
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-3 flex items-center gap-4 px-2">
+                                                            {['M', 'A', 'N'].map((time, tIdx) => (
+                                                                <button 
+                                                                    key={time}
+                                                                    type="button"
+                                                                    onClick={() => updateMedicine(idx, tIdx === 0 ? 'morning' : tIdx === 1 ? 'afternoon' : 'night', !med[tIdx === 0 ? 'morning' : tIdx === 1 ? 'afternoon' : 'night'])}
+                                                                    className={`w-6 h-6 rounded-lg text-[8px] font-black transition-all border ${
+                                                                        med[tIdx === 0 ? 'morning' : tIdx === 1 ? 'afternoon' : 'night'] 
+                                                                        ? 'bg-cyan-500 border-cyan-500 text-slate-950 shadow-[0_0_10px_rgba(6,182,212,0.3)]' 
+                                                                        : 'bg-slate-900 border-white/10 text-slate-500'
+                                                                    }`}
+                                                                >
+                                                                    {time}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="md:col-span-1 flex items-center justify-end">
+                                                            {consultation.medicines.length > 1 && (
+                                                                <button type="button" onClick={() => removeMedicine(idx)} className="text-slate-600 hover:text-rose-500">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

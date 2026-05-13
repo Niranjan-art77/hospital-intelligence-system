@@ -45,11 +45,13 @@ def add_patient():
         counter += 1
         c.execute('SELECT id FROM users WHERE email = ?', (email,))
 
+    gender = data.get('gender')
+    
     try:
         c.execute('''
-            INSERT INTO users (id, email, password, fullName, role, age, bloodGroup, chronicConditions) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (patient_id, email, pwd, name, 'PATIENT', age, bloodGroup, chronicConditions))
+            INSERT INTO users (id, email, password, fullName, role, age, gender, bloodGroup, chronicConditions) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (patient_id, email, pwd, name, 'PATIENT', age, gender, bloodGroup, chronicConditions))
         conn.commit()
         return jsonify({"success": True, "id": patient_id, "message": "Patient created", "email": email}), 201
     except Exception as e:

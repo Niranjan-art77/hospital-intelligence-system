@@ -36,9 +36,9 @@ export default function AddPatient() {
             setVitals({ bloodPressure: "", sugarLevel: "", weight: "", height: "" });
 
         } catch (err) {
-            const msg = err.response?.data?.message || "Error adding patient. See console.";
+            const msg = err.response?.data?.message || "UPLINK FAILURE: Could not integrate subject into neural database.";
             alert(msg);
-            console.error(err);
+            console.error("Link Error:", err);
         }
     };
 
