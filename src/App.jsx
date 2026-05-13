@@ -22,6 +22,7 @@ import ICUMonitor from "./pages/ICUMonitor";
 import NotificationCenter from "./pages/NotificationCenter";
 import DiseaseStats from "./pages/DiseaseStats";
 import PharmacyDashboard from "./pages/pharmacy/PharmacyDashboard";
+import PharmacyLayout from "./layouts/PharmacyLayout";
 
 // Staff pages
 import StaffLayout from "./layouts/StaffLayout";
@@ -61,12 +62,13 @@ const RoleRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="loading-spinner"><div className="spinner" /></div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to their proper dashboard
     if (user.role === "ADMIN") return <Navigate to="/admin" replace />;
     if (user.role === "STAFF") return <Navigate to="/staff" replace />;
     if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
     if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
+    if (user.role === "PHARMACY") return <Navigate to="/pharmacy" replace />;
   }
   return children;
 };
@@ -80,6 +82,7 @@ const RootRedirect = () => {
   if (user.role === "STAFF") return <Navigate to="/staff" replace />;
   if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
   if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
+  if (user.role === "PHARMACY") return <Navigate to="/pharmacy" replace />;
   return <Navigate to="/login" replace />;
 };
 
@@ -144,6 +147,19 @@ export default function App() {
           <Route path="messages" element={<DoctorMessages />} />
           <Route path="performance" element={<DoctorPerformance />} />
           <Route path="emergency-response" element={<EmergencyResponseMode />} />
+        </Route>
+
+        {/* Pharmacy Routes */}
+        <Route path="/pharmacy" element={
+          <RoleRoute allowedRoles={["PHARMACY", "ADMIN"]}>
+            <PharmacyLayout />
+          </RoleRoute>
+        }>
+          <Route index element={<PharmacyDashboard />} />
+          <Route path="inventory" element={<PharmacyDashboard />} />
+          <Route path="prescriptions" element={<PharmacyDashboard />} />
+          <Route path="billing" element={<PharmacyDashboard />} />
+          <Route path="notifications" element={<NotificationCenter />} />
         </Route>
 
         {/* Patient Routes */}

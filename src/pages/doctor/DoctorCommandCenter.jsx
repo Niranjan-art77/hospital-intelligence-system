@@ -27,6 +27,7 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [consultation, setConsultation] = useState({ problem: "", resolution: "", billingAmount: 0 });
     const [showProfile, setShowProfile] = useState(false);
+    const [bills, setBills] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -34,12 +35,14 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
 
     const fetchData = async () => {
         try {
-            const [pRes, aRes] = await Promise.all([
+            const [pRes, aRes, bRes] = await Promise.all([
                 API.get("/patients"),
-                API.get("/appointments")
+                API.get("/appointments"),
+                API.get("/billing/all")
             ]);
             setPatients(pRes.data || []);
             setAppointments(aRes.data || []);
+            setBills(bRes.data || []);
         } catch (err) {
             console.error("Link failure", err);
         } finally {
@@ -442,30 +445,48 @@ export default function DoctorCommandCenter({ activeTab: propTab }) {
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Subject</th>
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount</th>
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
-                                        {/* Mock data for demonstration, in real app this would be fetched */}
-                                        {[
-                                            { id: 'TX-902', name: 'John Doe', amount: '₹1,200', status: 'PENDING', date: '2024-05-13' },
-                                            { id: 'TX-891', name: 'Kavya', amount: '₹500', status: 'PAID', date: '2024-05-12' },
-                                            { id: 'TX-872', name: 'Rahul S.', amount: '₹2,500', status: 'PAID', date: '2024-05-10' }
-                                        ].map((bill, i) => (
-                                            <tr key={i} className="hover:bg-white/5 transition-all group">
-                                                <td className="px-8 py-6 text-xs font-black text-white">{bill.id}</td>
-                                                <td className="px-8 py-6 text-xs font-black text-slate-300">{bill.name}</td>
-                                                <td className="px-8 py-6 text-xs font-black text-amber-400">{bill.amount}</td>
-                                                <td className="px-8 py-6">
-                                                    <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
-                                                        bill.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                                    }`}>
-                                                        {bill.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-6 text-[10px] font-black text-slate-500">{bill.date}</td>
+                                        {bills.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" className="px-8 py-10 text-center text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] italic">No active billing nodes detected</td>
                                             </tr>
-                                        ))}
+                                        ) : (
+                                            bills.map((bill, i) => (
+                                                <tr key={i} className="hover:bg-white/5 transition-all group">
+                                                    <td className="px-8 py-6 text-xs font-black text-white">TX-{bill.id}</td>
+                                                    <td className="px-8 py-6 text-xs font-black text-slate-300">{patients.find(p => p.id === bill.patientId)?.name || bill.patientId}</td>
+                                                    <td className="px-8 py-6 text-xs font-black text-amber-400">₹{bill.amount}</td>
+                                                    <td className="px-8 py-6">
+                                                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                                            bill.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                        }`}>
+                                                            {bill.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-8 py-6">
+                                                        {bill.status === 'PENDING' && (
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        await API.post(`/billing/pay/${bill.id}`, { method: 'NEURAL_LINK' });
+                                                                        addToast({ type: "success", title: "PAYMENT AUTHORIZED", message: "Transaction completed successfully." });
+                                                                        fetchData();
+                                                                    } catch (e) {
+                                                                        addToast({ type: "error", title: "AUTH FAILURE", message: "Could not process payment." });
+                                                                    }
+                                                                }}
+                                                                className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[8px] font-black text-amber-400 uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all"
+                                                            >
+                                                                Settle Node
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

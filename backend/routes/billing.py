@@ -16,6 +16,15 @@ def get_patient_bills(patient_id):
         "data": bills
     })
 
+@billing_bp.route('/all', methods=['GET'])
+def get_all_bills():
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM billing ORDER BY createdAt DESC')
+    bills = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return jsonify(bills)
+
 @billing_bp.route('/pay/<int:bill_id>', methods=['POST'])
 def pay_bill(bill_id):
     data = request.json

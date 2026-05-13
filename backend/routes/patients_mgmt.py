@@ -33,14 +33,29 @@ def add_patient():
     
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute('''
-        INSERT INTO users (id, email, password, fullName, role, age, bloodGroup, chronicConditions) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (patient_id, f"{name.lower().replace(' ', '')}@nova.com", pwd, name, 'PATIENT', age, bloodGroup, chronicConditions))
-    conn.commit()
-    conn.close()
     
-    return jsonify({"success": True, "id": patient_id, "message": "Patient created"}), 201
+    # Ensure unique email
+    base_email = f"{name.lower().replace(' ', '')}"
+    email = f"{base_email}@nova.com"
+    counter = 1
+    
+    c.execute('SELECT id FROM users WHERE email = ?', (email,))
+    while c.fetchone():
+        email = f"{base_email}{counter}@nova.com"
+        counter += 1
+        c.execute('SELECT id FROM users WHERE email = ?', (email,))
+
+    try:
+        c.execute('''
+            INSERT INTO users (id, email, password, fullName, role, age, bloodGroup, chronicConditions) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (patient_id, email, pwd, name, 'PATIENT', age, bloodGroup, chronicConditions))
+        conn.commit()
+        return jsonify({"success": True, "id": patient_id, "message": "Patient created", "email": email}), 201
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
 
 @patients_bp.route('/<patient_id>', methods=['GET'])
 def get_patient(patient_id):

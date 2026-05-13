@@ -121,8 +121,9 @@ export default function Register() {
                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         >
                             <option value="PATIENT">PATIENT</option>
-                            <option value="DOCTOR">MEDICAL DOCTOR</option>
+                            <option value="DOCTOR">DOCTOR DASHBOARD</option>
                             <option value="STAFF">HOSPITAL STAFF</option>
+                            <option value="PHARMACY">PHARMACY DISPENSARY</option>
                             <option value="ADMIN">ADMINISTRATOR</option>
                         </select>
                     </div>

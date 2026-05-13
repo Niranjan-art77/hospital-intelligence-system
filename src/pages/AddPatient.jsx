@@ -36,7 +36,8 @@ export default function AddPatient() {
             setVitals({ bloodPressure: "", sugarLevel: "", weight: "", height: "" });
 
         } catch (err) {
-            alert("Error adding patient. See console.");
+            const msg = err.response?.data?.message || "Error adding patient. See console.";
+            alert(msg);
             console.error(err);
         }
     };
@@ -95,6 +96,16 @@ export default function AddPatient() {
                         <div className="relative group">
                             <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1 block">Chronic Conditions (Optional)</label>
                             <input id="cond" className="input-tech w-full transition-all group-hover:border-[#0EA5E9]/50" placeholder="e.g. Hypertension, Diabetes" value={form.chronicConditions} onChange={e => setForm({ ...form, chronicConditions: e.target.value })} />
+                        </div>
+                        <div className="relative group md:col-span-2">
+                            <label className="text-[10px] text-emerald-500 uppercase tracking-widest font-black mb-1 block">Neural Biometric Signature</label>
+                            <div className="relative">
+                                <input readOnly className="input-tech w-full border-emerald-500/20 bg-emerald-500/5 text-emerald-400 font-mono text-[10px]" value={`BIO-${Math.random().toString(36).toUpperCase().slice(2, 12)}-${Date.now()}`} />
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[8px] font-black text-emerald-500 uppercase">Authenticated</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
