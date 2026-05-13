@@ -3,25 +3,29 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
+# Create SocketIO globally
+socketio = SocketIO(cors_allowed_origins="*")
+
 def create_app():
     app = Flask(__name__)
+
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    # Initialize SocketIO
-    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+    # Initialize socketio with app
+    socketio.init_app(app)
 
     @app.route('/', methods=['GET'])
     def index():
         return jsonify({
             "status": "active",
-            "message": "Health Intelligence System Backend Running (Flask)"
+            "message": "Health Intelligence System Backend Running"
         })
 
     @app.route('/api/health', methods=['GET'])
     def health():
         return jsonify({"status": "ok"})
 
-    # Register blueprints (routes)
+    # Import Blueprints
     from routes.doctors import doctors_bp
     from routes.billing import billing_bp
     from routes.auth import auth_bp
@@ -39,7 +43,7 @@ def create_app():
     from routes.beds import beds_bp
     from routes.symptoms import symptoms_bp
 
-    # Blueprint registrations
+    # Register Blueprints
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
     app.register_blueprint(messages_bp, url_prefix='/api/chat')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
@@ -57,7 +61,7 @@ def create_app():
     app.register_blueprint(beds_bp, url_prefix='/api/beds')
     app.register_blueprint(symptoms_bp, url_prefix='/api/symptoms')
 
-    # Special routes
+    # Special Routes
     @app.route('/api/hospitals/nearby', methods=['GET'])
     def root_hospitals():
         from routes.emergency import get_nearby_hospitals
@@ -71,57 +75,71 @@ def create_app():
     # 404 Handler
     @app.errorhandler(404)
     def resource_not_found(e):
-        return jsonify(
-            error=str(e),
-            message="Route not found on Flask backend. May not be migrated yet."
-        ), 404
+        return jsonify({
+            "error": str(e),
+            "message": "Route not found on Flask backend."
+        }), 404
 
-    # SocketIO Handlers
-    @socketio.on('connect')
-    def handle_connect():
-        print('Client connected:', request.sid)
-
-    @socketio.on('disconnect')
-    def handle_disconnect():
-        print('Client disconnected:', request.sid)
-
-    @socketio.on('join-room')
-    def on_join(room):
-        join_room(room)
-        print(f'User joined room: {room}')
-
-    @socketio.on('leave-room')
-    def on_leave(room):
-        leave_room(room)
-        print(f'User left room: {room}')
-
-    @socketio.on('send-message')
-    def handle_send_message(data):
-        room = data.get('conversationId')
-        emit('new-message', data, room=room)
-        print(f'Message sent to room {room}: {data.get("content")}')
-
-    @socketio.on('typing')
-    def handle_typing(data):
-        room = data.get('conversationId')
-        emit('user-typing', data, room=room, include_self=False)
-
-    # Initialize database
+    # Initialize Database
     from utils.db import init_db
     init_db()
 
-    return app, socketio
+    return app
 
 
-app, socketio = create_app()
+# Create app
+app = create_app()
+
+# =========================
+# SOCKET EVENTS
+# =========================
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected:', request.sid)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected:', request.sid)
+
+@socketio.on('join-room')
+def on_join(room):
+    join_room(room)
+    print(f'User joined room: {room}')
+
+@socketio.on('leave-room')
+def on_leave(room):
+    leave_room(room)
+    print(f'User left room: {room}')
+
+@socketio.on('send-message')
+def handle_send_message(data):
+    room = data.get('conversationId')
+
+    emit('new-message', data, room=room)
+
+    print(f'Message sent to room {room}')
+
+@socketio.on('typing')
+def handle_typing(data):
+    room = data.get('conversationId')
+
+    emit(
+        'user-typing',
+        data,
+        room=room,
+        include_self=False
+    )
+
+# =========================
+# MAIN
+# =========================
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
 
-    # IMPORTANT: use socketio.run()
     socketio.run(
         app,
-        host="0.0.0.0",
-        port=port,
-        debug=True
+        host='0.0.0.0',
+        port=port
     )
