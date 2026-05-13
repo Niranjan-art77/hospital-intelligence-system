@@ -704,8 +704,6 @@ export default function PharmacyDashboard() {
 </AnimatePresence>
 </div>
 );
-}
-
 // Sub-Components
 function PrescriptionCard({ p, patientName, isSelected, onClick, delay }) {
     const meds = p.items || p.medications || [];
