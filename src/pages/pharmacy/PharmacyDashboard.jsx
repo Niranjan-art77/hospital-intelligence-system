@@ -700,10 +700,10 @@ export default function PharmacyDashboard() {
                             </div>
                         </motion.div>
                     </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
+    )}
+</AnimatePresence>
+</div>
+);
 }
 
 // Sub-Components
