@@ -17,6 +17,7 @@ export default function PrescriptionManager() {
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [inventory, setInventory] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -24,12 +25,14 @@ export default function PrescriptionManager() {
 
     const fetchData = async () => {
         try {
-            const [pRes, aRes] = await Promise.all([
+            const [pRes, aRes, iRes] = await Promise.all([
                 API.get("/patients"),
-                API.get("/appointments")
+                API.get("/appointments"),
+                API.get("/pharmacy/inventory")
             ]);
             setPatients(Array.isArray(pRes.data) ? pRes.data : []);
             setAppointments(Array.isArray(aRes.data) ? aRes.data : []);
+            setInventory(Array.isArray(iRes.data) ? iRes.data : []);
         } catch (e) {
             console.error("Failed to fetch initial data", e);
         }
@@ -173,7 +176,8 @@ export default function PrescriptionManager() {
                                             className="w-full bg-slate-900 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer"
                                         >
                                             <option value="">-- Select Session --</option>
-                                            {appointments.filter(a => a.patientId === form.patientId).map(a => (
+                                            <option value="DIRECT">DIRECT NEURAL LINK (Walk-in)</option>
+                                            {appointments.filter(a => String(a.patientId) === String(form.patientId)).map(a => (
                                                 <option key={a.id} value={a.id}>
                                                     ID: {a.id} // {new Date(a.appointmentTime).toLocaleDateString()}
                                                 </option>
@@ -270,6 +274,14 @@ export default function PrescriptionManager() {
                                                     onChange={e => handleMedicineChange(index, "medicineName", e.target.value)}
                                                     className="w-full bg-transparent border-b border-white/10 py-2 text-sm text-white focus:outline-none focus:border-purple-500 transition-all"
                                                 />
+                                                {med.medicineName && (
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${inventory.find(i => i.medicineName.toLowerCase() === med.medicineName.toLowerCase())?.stock > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                                        <span className="text-[7px] font-black uppercase text-slate-500">
+                                                            Network Stock: {inventory.find(i => i.medicineName.toLowerCase() === med.medicineName.toLowerCase())?.stock || 0} units
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="md:col-span-2 space-y-1">
                                                 <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Concentration</label>
