@@ -1,10 +1,24 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
-# Create SocketIO globally
-socketio = SocketIO(cors_allowed_origins="*")
+# =========================
+# SOCKET IO CONFIG
+# =========================
+
+socketio = SocketIO(
+    cors_allowed_origins="*",
+    async_mode="eventlet",
+    transports=["websocket", "polling"]
+)
+
+# =========================
+# CREATE APP
+# =========================
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +27,10 @@ def create_app():
 
     # Initialize socketio with app
     socketio.init_app(app)
+
+    # =========================
+    # BASIC ROUTES
+    # =========================
 
     @app.route('/', methods=['GET'])
     def index():
@@ -25,7 +43,10 @@ def create_app():
     def health():
         return jsonify({"status": "ok"})
 
-    # Import Blueprints
+    # =========================
+    # IMPORT BLUEPRINTS
+    # =========================
+
     from routes.doctors import doctors_bp
     from routes.billing import billing_bp
     from routes.auth import auth_bp
@@ -43,7 +64,10 @@ def create_app():
     from routes.beds import beds_bp
     from routes.symptoms import symptoms_bp
 
-    # Register Blueprints
+    # =========================
+    # REGISTER BLUEPRINTS
+    # =========================
+
     app.register_blueprint(doctors_bp, url_prefix='/api/doctors')
     app.register_blueprint(messages_bp, url_prefix='/api/chat')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
@@ -61,7 +85,10 @@ def create_app():
     app.register_blueprint(beds_bp, url_prefix='/api/beds')
     app.register_blueprint(symptoms_bp, url_prefix='/api/symptoms')
 
-    # Special Routes
+    # =========================
+    # SPECIAL ROUTES
+    # =========================
+
     @app.route('/api/hospitals/nearby', methods=['GET'])
     def root_hospitals():
         from routes.emergency import get_nearby_hospitals
@@ -72,7 +99,10 @@ def create_app():
         from routes.emergency import log_emergency
         return log_emergency()
 
-    # 404 Handler
+    # =========================
+    # ERROR HANDLER
+    # =========================
+
     @app.errorhandler(404)
     def resource_not_found(e):
         return jsonify({
@@ -80,14 +110,20 @@ def create_app():
             "message": "Route not found on Flask backend."
         }), 404
 
-    # Initialize Database
+    # =========================
+    # DATABASE INIT
+    # =========================
+
     from utils.db import init_db
     init_db()
 
     return app
 
 
-# Create app
+# =========================
+# CREATE APP INSTANCE
+# =========================
+
 app = create_app()
 
 # =========================
@@ -98,6 +134,10 @@ app = create_app()
 def handle_connect():
     print('Client connected:', request.sid)
 
+    emit('connection-success', {
+        "message": "Connected successfully"
+    })
+
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected:', request.sid)
@@ -105,31 +145,45 @@ def handle_disconnect():
 @socketio.on('join-room')
 def on_join(room):
     join_room(room)
+
     print(f'User joined room: {room}')
+
+    emit(
+        'user-joined',
+        {"room": room},
+        room=room
+    )
 
 @socketio.on('leave-room')
 def on_leave(room):
     leave_room(room)
+
     print(f'User left room: {room}')
 
 @socketio.on('send-message')
 def handle_send_message(data):
     room = data.get('conversationId')
 
-    emit('new-message', data, room=room)
+    if room:
+        emit(
+            'new-message',
+            data,
+            room=room
+        )
 
-    print(f'Message sent to room {room}')
+        print(f'Message sent to room {room}')
 
 @socketio.on('typing')
 def handle_typing(data):
     room = data.get('conversationId')
 
-    emit(
-        'user-typing',
-        data,
-        room=room,
-        include_self=False
-    )
+    if room:
+        emit(
+            'user-typing',
+            data,
+            room=room,
+            include_self=False
+        )
 
 # =========================
 # MAIN
@@ -141,8 +195,6 @@ if __name__ == '__main__':
     socketio.run(
         app,
         host='0.0.0.0',
-        port=port
-
-
-        
+        port=port,
+        allow_unsafe_werkzeug=True
     )
