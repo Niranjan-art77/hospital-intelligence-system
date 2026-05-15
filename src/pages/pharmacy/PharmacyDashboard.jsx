@@ -180,16 +180,16 @@ export default function PharmacyDashboard() {
 
     return (
         <div className="min-h-screen bg-[#020617] text-white overflow-hidden flex flex-col p-4 lg:p-8">
-            {/* Background HUD Layer */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-emerald-500/5 blur-[150px] rounded-full" />
-                <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-teal-500/5 blur-[150px] rounded-full" />
-                <div className="absolute inset-0 medical-grid opacity-[0.03]" />
-                <div className="absolute inset-0 scanline opacity-[0.01]" />
+            {/* Enhanced Background HUD Layer */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[70%] h-[70%] bg-emerald-600/10 blur-[180px] rounded-full animate-pulse-slow" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-teal-600/10 blur-[150px] rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }} />
+                <div className="absolute inset-0 medical-grid opacity-[0.05]" />
+                <div className="absolute inset-0 scanline opacity-[0.02]" />
             </div>
 
             {/* Header HUD */}
-            <header className="relative z-20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <header className="relative z-20 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-10">
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
@@ -320,16 +320,40 @@ export default function PharmacyDashboard() {
                                 >
                                     <div className="flex justify-between items-end mb-2">
                                         <div>
-                                            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                                <Database className="text-blue-500" size={14} /> Global Asset Matrix
+                                            <h3 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+                                                <Database className="text-teal-400" size={18} /> Global Asset Matrix
                                             </h3>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Real-time compound inventory & AI forecasting</p>
                                         </div>
                                         <button className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[9px] font-black text-emerald-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-[#020617] transition-all flex items-center gap-2">
                                             <Sparkles size={12} /> Sync Stock
                                         </button>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {/* AI Demand Forecasting Panel */}
+                                        <div className="lg:col-span-3 glass-card p-8 border-teal-500/20 bg-teal-500/5 relative overflow-hidden group mb-4">
+                                            <div className="hud-corner top-left opacity-30" />
+                                            <div className="flex items-start justify-between relative z-10">
+                                                <div className="flex gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                                                        <Sparkles size={20} className="animate-pulse" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                                            AI Predictive Demand Model
+                                                        </h4>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                                            Projected shortage: <span className="text-rose-400">Paracetamol</span> and <span className="text-amber-400">Amoxicillin</span> over the next 72 hours due to viral season spike.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button className="px-6 py-3 bg-teal-500/10 border border-teal-500/30 text-teal-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-teal-500 hover:text-slate-900 transition-all shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+                                                    Auto-Reorder Critical Stock
+                                                </button>
+                                            </div>
+                                        </div>
+
                                         {loading ? <LoadingState /> : filteredInventory.map((item, i) => (
                                             <InventoryCard 
                                                 key={item._id || item.id || i} 

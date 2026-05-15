@@ -7,12 +7,15 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../services/api";
+import PatientDetailPanel from "../../components/PatientDetailPanel";
+import { AnimatePresence } from "framer-motion";
 
 export default function DoctorPatients() {
     const { user } = useAuth();
     const [patients, setPatients] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
+    const [selectedPatient, setSelectedPatient] = useState(null);
 
     useEffect(() => {
         API.get("/patients")
@@ -139,7 +142,10 @@ export default function DoctorPatients() {
                                 <div className="p-2 bg-white/5 rounded-lg text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer"><Activity size={14} /></div>
                                 <div className="p-2 bg-white/5 rounded-lg text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"><Heart size={14} /></div>
                             </div>
-                            <button className="flex items-center gap-2 text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em] group/btn">
+                            <button 
+                                onClick={() => setSelectedPatient(p)}
+                                className="flex items-center gap-2 text-[9px] font-black text-cyan-400 uppercase tracking-[0.2em] group/btn"
+                            >
                                 Open Clinical HUD <ArrowUpRight size={14} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                             </button>
                         </div>
@@ -154,6 +160,15 @@ export default function DoctorPatients() {
                     </div>
                 )}
             </div>
+
+            <AnimatePresence>
+                {selectedPatient && (
+                    <PatientDetailPanel 
+                        appointment={{ patient: selectedPatient }} 
+                        onClose={() => setSelectedPatient(null)} 
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

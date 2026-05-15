@@ -179,7 +179,7 @@ export default function PrescriptionManager() {
                                         >
                                             <option value="">-- Select Session --</option>
                                             <option value="DIRECT">DIRECT NEURAL LINK (Walk-in)</option>
-                                            {appointments.filter(a => String(a.patientId) === String(form.patientId)).map(a => (
+                                            {appointments.filter(a => String(a.patientId) === String(form.patientId) || String(a.patient?.id) === String(form.patientId) || String(a.patient?._id) === String(form.patientId)).map(a => (
                                                 <option key={a.id} value={a.id}>
                                                     ID: {a.id} // {new Date(a.appointmentTime).toLocaleDateString()}
                                                 </option>

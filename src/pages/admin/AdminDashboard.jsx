@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Shield, Activity, Globe, Cpu, Lock, 
-  Terminal, Server, Database, Eye, Zap,
-  AlertCircle, CheckCircle, BarChart, HardDrive
+  Activity, Globe, Cpu, Lock, 
+  Terminal, Server, Database, Zap
 } from 'lucide-react';
-import API from '../../services/api';
-import { Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboard() {
   const [logs, setLogs] = useState([]);
