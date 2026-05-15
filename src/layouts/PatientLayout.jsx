@@ -13,7 +13,6 @@ const navItems = [
     { to: "/patient/health", icon: "📊", label: "Health Monitor" },
     { to: "/patient/reports", icon: "📄", label: "Medical Reports" },
     { to: "/patient/health-card", icon: "🎫", label: "Health Card" },
-    { to: "/patient/messages", icon: "💬", label: "Messaging" },
     { to: "/patient/recommendations", icon: "🩺", label: "Doctor Match" },
     { to: "/patient/history", icon: "📜", label: "History Timeline" },
     { to: "/patient/recovery", icon: "🧗", label: "Recovery Roadmap" },

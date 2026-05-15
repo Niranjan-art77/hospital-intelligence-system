@@ -34,7 +34,6 @@ import DoctorDashboard from "./pages/doctor/DoctorCommandCenter";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import PrescriptionManager from "./pages/doctor/PrescriptionManager";
-import DoctorMessages from "./pages/doctor/DoctorMessages";
 import DoctorPerformance from "./pages/doctor/DoctorPerformance";
 import EmergencyResponseMode from "./pages/doctor/EmergencyResponseMode";
 
@@ -46,7 +45,6 @@ import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHealthMonitor from "./pages/patient/PatientHealthMonitor";
 import PatientReports from "./pages/patient/PatientReports";
 import HealthCard from "./pages/patient/HealthCard";
-import PatientMessages from "./pages/patient/PatientMessages";
 import DoctorRecommendation from "./pages/patient/DoctorRecommendation";
 import MedicalHistory from "./pages/patient/MedicalHistory";
 import RecoveryTracker from "./pages/patient/RecoveryTracker";
@@ -144,7 +142,6 @@ export default function App() {
           <Route path="consultation" element={<DoctorDashboard activeTab="consultation" />} />
           <Route path="prescriptions" element={<PrescriptionManager />} />
           <Route path="billing" element={<DoctorDashboard activeTab="billing" />} />
-          <Route path="messages" element={<DoctorMessages />} />
           <Route path="performance" element={<DoctorPerformance />} />
           <Route path="emergency-response" element={<EmergencyResponseMode />} />
         </Route>
@@ -172,7 +169,6 @@ export default function App() {
           <Route path="appointments" element={<PatientAppointments />} />
           <Route path="prescriptions" element={<PatientPrescriptions />} />
           <Route path="directory" element={<DoctorDirectory />} />
-          <Route path="messages" element={<PatientMessages />} />
           <Route path="health" element={<PatientHealthMonitor />} />
           <Route path="reports" element={<PatientReports />} />
           <Route path="health-card" element={<HealthCard />} />
