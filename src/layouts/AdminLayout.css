@@ -1,19 +1,20 @@
 .admin-layout {
     display: flex;
     min-height: 100vh;
-    background: #020617;
+    background: #020617; /* Deep Navy */
     color: #f8fafc;
     overflow: hidden;
 }
 
 .admin-sidebar {
     background: linear-gradient(180deg, #0a1628 0%, #020617 100%);
-    border-right: 1px solid rgba(14, 165, 233, 0.1);
+    border-right: 1px solid rgba(14, 165, 233, 0.15);
     display: flex;
     flex-direction: column;
     height: 100vh;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
     z-index: 50;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-brand {
@@ -21,18 +22,20 @@
     align-items: center;
     gap: 16px;
     padding: 24px 20px;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.05);
+    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
 }
 
 .brand-icon {
     width: 42px;
     height: 42px;
     background: linear-gradient(135deg, #0891b2, #0e7490);
-    border-radius: 14px;
+    border-radius: 10px; /* Sharp corners */
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+    border: 1px solid rgba(6, 182, 212, 0.4);
 }
 
 .brand-name {
@@ -40,6 +43,7 @@
     font-size: 1.1rem;
     color: #f8fafc;
     letter-spacing: -0.025em;
+    text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
 }
 
 .brand-role {
@@ -64,19 +68,20 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    border-radius: 16px;
+    border-radius: 8px; /* Sharp */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(14, 165, 233, 0.05);
+    border-color: rgba(14, 165, 233, 0.1);
 }
 
 .nav-item.active {
     background: rgba(6, 182, 212, 0.08);
-    border-color: rgba(6, 182, 212, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: inset 0 0 15px rgba(6, 182, 212, 0.1);
 }
 
 .nav-item.active::before {
@@ -96,6 +101,7 @@
     height: 100vh;
     overflow-y: auto;
     position: relative;
+    background: #01040f;
 }
 
 /* Custom Scrollbar */
@@ -118,7 +124,7 @@
 
 .medical-grid {
     background-image: 
-        radial-gradient(circle at 2px 2px, rgba(14, 165, 233, 0.05) 1px, transparent 0);
+        radial-gradient(circle at 2px 2px, rgba(14, 165, 233, 0.1) 1px, transparent 0);
     background-size: 40px 40px;
 }
 

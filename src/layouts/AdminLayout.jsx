@@ -157,9 +157,9 @@ export default function AdminLayout() {
                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-20" />
             </aside>
 
-            <main className="admin-content relative bg-[#060b17]">
+            <main className="admin-content relative">
                 <div className="absolute inset-0 medical-grid opacity-20 pointer-events-none" />
-                <div className="relative z-10 custom-scrollbar overflow-x-hidden">
+                <div className="relative z-10 custom-scrollbar overflow-x-hidden h-full">
                     <Outlet />
                 </div>
                 <Chatbot />

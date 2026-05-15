@@ -1,143 +1,199 @@
 .doctor-layout {
     display: flex;
     min-height: 100vh;
-    background: #060d1f;
+    background: #022c22; /* Deep Teal/Emerald Dark */
+    color: #ecfdf5;
+    overflow: hidden;
 }
 
 .doctor-sidebar {
     width: 240px;
     min-width: 240px;
-    background: linear-gradient(180deg, #0a1628 0%, #071020 100%);
-    border-right: 1px solid rgba(16, 185, 129, 0.12);
+    background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
+    border-right: 1px solid rgba(16, 185, 129, 0.2);
     display: flex;
     flex-direction: column;
     position: sticky;
     top: 0;
     height: 100vh;
+    box-shadow: 5px 0 25px rgba(4, 120, 87, 0.2);
+    z-index: 50;
 }
 
 .dsidebar-brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 20px 18px;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    padding: 24px 18px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.15);
 }
 
 .dbrand-icon {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    border: 1px solid rgba(52, 211, 153, 0.5);
 }
 
 .dbrand-name {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #f0f6ff;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #ecfdf5;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .dbrand-role {
-    font-size: 0.7rem;
-    color: #10b981;
+    font-size: 0.65rem;
+    color: #34d399;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.15em;
+    font-weight: 700;
 }
 
 .dsidebar-nav {
     flex: 1;
-    padding: 12px 10px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
+    overflow-y: auto;
 }
 
 .dnav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #94a3b8;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: #a7f3d0;
     text-decoration: none;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    font-size: 0.85rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
 }
 
 .dnav-item:hover {
     background: rgba(16, 185, 129, 0.08);
-    color: #e2f0ff;
+    color: #ecfdf5;
+    border-color: rgba(16, 185, 129, 0.2);
 }
 
 .dnav-item.active {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), transparent);
     color: #34d399;
-    border-left: 3px solid #10b981;
+    border-color: rgba(16, 185, 129, 0.4);
+    border-left: 4px solid #10b981;
+    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.1);
 }
 
 .dsidebar-user {
-    padding: 14px;
-    border-top: 1px solid rgba(16, 185, 129, 0.1);
+    padding: 16px;
+    border-top: 1px solid rgba(16, 185, 129, 0.15);
+    background: rgba(0, 0, 0, 0.15);
 }
 
 .duser-info {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
 .duser-avatar {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 50%;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 800;
     color: white;
-    font-size: 0.9rem;
+    font-size: 1rem;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
 }
 
 .duser-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #e2f0ff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ecfdf5;
 }
 
 .duser-role {
     font-size: 0.7rem;
-    color: #64748b;
+    color: #6ee7b7;
+    font-weight: 600;
 }
 
 .dlogout-btn {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 8px;
-    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    color: #fca5a5;
     font-size: 0.8rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
 }
 
 .dlogout-btn:hover {
     background: rgba(239, 68, 68, 0.2);
+    color: #fef2f2;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
 
 .doctor-content {
     flex: 1;
     overflow-y: auto;
     min-width: 0;
+    position: relative;
+    background: #021f18; /* Darker clinical bg */
+}
+
+/* Holographic Grid Background */
+.clinical-hologram {
+    background-image: 
+        radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, transparent 60%),
+        linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-position: center center;
+}
+
+/* Crosshair decorations for clinical precision feel */
+.clinical-hologram::before, .clinical-hologram::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 2px solid rgba(52, 211, 153, 0.2);
+    pointer-events: none;
+}
+
+.clinical-hologram::before {
+    top: 20px;
+    left: 20px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.clinical-hologram::after {
+    bottom: 20px;
+    right: 20px;
+    border-left: none;
+    border-top: none;
 }

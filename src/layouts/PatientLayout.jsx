@@ -31,7 +31,7 @@ export default function PatientLayout() {
     );
 
     return (
-        <div className="patient-layout">
+        <div className="patient-layout selection:bg-pink-500/30">
             <aside className="patient-sidebar">
                 <div className="psidebar-brand">
                     <div className="pbrand-icon">❤️</div>
@@ -52,13 +52,13 @@ export default function PatientLayout() {
                         <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "0.8rem", opacity: 0.5 }}>🔍</span>
                     </div>
                 </div>
-                <nav className="psidebar-nav">
+                <nav className="psidebar-nav custom-scrollbar overflow-x-hidden">
                     {filteredNav.map(({ to, icon, label, end, special }) => (
                         <NavLink 
                             key={to} 
                             to={to} 
                             end={end} 
-                            className={({ isActive }) => `pnav-item ${isActive ? "active" : ""} ${special ? "sos-emergency" : ""}`}
+                            className={({ isActive }) => `pnav-item group relative ${isActive ? "active text-pink-400" : "text-purple-300/70 hover:text-pink-300"} ${special ? "sos-emergency" : ""}`}
                             style={special ? {
                                 background: "linear-gradient(135deg, #ef4444, #991b1b)",
                                 color: "white",
@@ -67,12 +67,15 @@ export default function PatientLayout() {
                                 border: "1px solid rgba(239, 68, 68, 0.5)"
                             } : {}}
                         >
-                            <span>{icon}</span><span>{label}</span>
+                            <div className="flex items-center gap-3 px-4 py-3">
+                                <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
+                                <span className="text-[11px] font-bold tracking-wide">{label}</span>
+                            </div>
                         </NavLink>
                     ))}
-                    {filteredNav.length === 0 && <div style={{ padding: "20px", color: "#64748b", fontSize: "0.8rem", textAlign: "center" }}>No features found</div>}
+                    {filteredNav.length === 0 && <div style={{ padding: "20px", color: "#f472b6", fontSize: "0.8rem", textAlign: "center" }}>No features found</div>}
                 </nav>
-                <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                <div style={{ padding: "12px", borderTop: "1px solid rgba(236, 72, 153, 0.1)" }}>
                     <button
                         onClick={() =>
                             addToast({
@@ -88,9 +91,9 @@ export default function PatientLayout() {
                 </div>
                 <div className="psidebar-user">
                     <div className="puser-info">
-                        <div className="puser-avatar">{user?.fullName?.[0]?.toUpperCase()}</div>
-                        <div>
-                            <div className="puser-name">{user?.fullName}</div>
+                        <div className="puser-avatar shadow-lg shadow-pink-500/20">{user?.fullName?.[0]?.toUpperCase()}</div>
+                        <div className="min-w-0">
+                            <div className="puser-name truncate">{user?.fullName}</div>
                             <div className="puser-role">Patient</div>
                         </div>
                     </div>
@@ -100,7 +103,10 @@ export default function PatientLayout() {
                 </div>
             </aside>
             <main className="patient-content">
-                <Outlet />
+                <div className="bio-organic-bg"></div>
+                <div className="relative z-10 custom-scrollbar h-full overflow-x-hidden p-6">
+                    <Outlet />
+                </div>
                 <Chatbot />
             </main>
         </div>

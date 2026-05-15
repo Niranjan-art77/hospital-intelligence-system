@@ -39,130 +39,123 @@ export default function DoctorLayout() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-950 overflow-hidden selection:bg-cyan-500/30">
+        <div className="doctor-layout selection:bg-emerald-500/30">
             {/* Immersive Sidebar */}
-            <aside className="w-80 glass-card rounded-none border-r border-white/5 flex flex-col z-20 relative overflow-hidden">
-                <div className="absolute inset-0 scanline opacity-[0.02] pointer-events-none" />
-                
-                {/* Brand Header */}
-                <div className="p-8">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
-                            <Shield size={24} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Nova <span className="text-cyan-400">Health</span></h1>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">Clinical OS v4.2</p>
-                        </div>
+            <aside className="doctor-sidebar">
+                <div className="dsidebar-brand">
+                    <div className="dbrand-icon">
+                        <Shield size={24} />
                     </div>
+                    <div>
+                        <h1 className="dbrand-name">Nova <span className="text-emerald-400">Health</span></h1>
+                        <p className="dbrand-role">Clinical OS v4.2</p>
+                    </div>
+                </div>
 
-                    {/* Quick Search */}
+                {/* Quick Search */}
+                <div className="px-4 py-4">
                     <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-cyan-400 transition-colors" size={14} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600/50 group-focus-within:text-emerald-400 transition-colors" size={14} />
                         <input
                             type="text"
                             placeholder="Neural Query..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-slate-900/50 border border-white/5 rounded-xl py-3 pl-10 pr-4 text-[11px] text-white focus:outline-none focus:border-cyan-500/30 transition-all font-bold placeholder:text-slate-700 uppercase"
+                            className="w-full bg-black/20 border border-emerald-500/20 rounded-xl py-3 pl-10 pr-4 text-[11px] text-white focus:outline-none focus:border-emerald-500/50 transition-all font-bold placeholder:text-emerald-700/50 uppercase shadow-inner"
                         />
                     </div>
                 </div>
 
                 {/* Navigation Nodes */}
-                <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scroll">
-                    <p className="px-4 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4">Neural Navigation</p>
+                <nav className="dsidebar-nav custom-scroll">
+                    <p className="px-4 text-[9px] font-black text-emerald-700 uppercase tracking-[0.3em] mb-2">Neural Navigation</p>
                     {filteredNav.map(({ to, icon, label, end }) => (
                         <NavLink 
                             key={to} 
                             to={to} 
                             end={end} 
-                            className={({ isActive }) => `flex items-center gap-4 px-6 py-4 rounded-2xl transition-all group ${
-                                isActive 
-                                ? "bg-cyan-500/10 border border-cyan-500/20 text-white shadow-lg shadow-cyan-500/5" 
-                                : "text-slate-500 hover:text-cyan-400 hover:bg-white/5"
-                            }`}
+                            className={({ isActive }) => `dnav-item group ${isActive ? "active" : ""}`}
                         >
                             <span className="transition-transform group-hover:scale-110">{icon}</span>
-                            <span className="text-[11px] font-black uppercase tracking-widest">{label}</span>
+                            <span className="font-black uppercase tracking-widest">{label}</span>
                             {/* Active indicator */}
                             <div className="ml-auto opacity-0 group-[.active]:opacity-100 transition-opacity">
-                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
                             </div>
                         </NavLink>
                     ))}
                     {filteredNav.length === 0 && (
-                        <div className="p-8 text-center text-[10px] text-slate-600 font-bold uppercase italic">No nodes matching query</div>
+                        <div className="p-8 text-center text-[10px] text-emerald-800 font-bold uppercase italic">No nodes matching query</div>
                     )}
                 </nav>
 
                 {/* Action Sector */}
-                <div className="p-6 space-y-4 border-t border-white/5">
+                <div className="p-4 space-y-4">
                     <button
                         onClick={handleSOS}
-                        className="w-full flex items-center justify-center gap-3 py-4 bg-red-600/10 border border-red-600/20 rounded-2xl text-red-500 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-600 hover:text-white transition-all active:scale-[0.98] group"
+                        className="w-full flex items-center justify-center gap-3 py-3 bg-red-600/10 border border-red-600/30 rounded-xl text-red-500 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-600 hover:text-white transition-all active:scale-[0.98] group shadow-[0_0_15px_rgba(239,68,68,0.1)]"
                     >
                         <Activity size={16} className="group-hover:animate-pulse" /> EMERGENCY SOS
                     </button>
 
-                    <div className="flex items-center justify-between p-4 bg-slate-900/40 rounded-3xl border border-white/5">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-black border border-white/10">
+                    <div className="dsidebar-user rounded-2xl border border-emerald-500/20">
+                        <div className="duser-info">
+                            <div className="duser-avatar">
                                 {user?.fullName?.[0]?.toUpperCase()}
                             </div>
-                            <div>
-                                <p className="text-[11px] font-black text-white uppercase tracking-tighter truncate w-24">{user?.fullName}</p>
+                            <div className="min-w-0">
+                                <p className="duser-name truncate w-24">{user?.fullName}</p>
                                 <div className="flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[8px] font-black text-slate-500 uppercase">Synchronized</span>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_rgba(52,211,153,0.8)]" />
+                                    <span className="text-[8px] font-black text-emerald-600 uppercase">Synchronized</span>
                                 </div>
                             </div>
+                            <button 
+                                onClick={() => { logout(); navigate("/login"); }}
+                                className="ml-auto p-2 text-emerald-700 hover:text-red-400 transition-colors"
+                                title="Terminate Uplink"
+                            >
+                                <LogOut size={16} />
+                            </button>
                         </div>
-                        <button 
-                            onClick={() => { logout(); navigate("/login"); }}
-                            className="p-2 text-slate-600 hover:text-red-400 transition-colors"
-                            title="Terminate Uplink"
-                        >
-                            <LogOut size={18} />
-                        </button>
                     </div>
                 </div>
             </aside>
 
             {/* Tactical Content Main */}
-            <main className="flex-1 relative overflow-hidden flex flex-col">
-                <div className="absolute inset-0 medical-grid opacity-30 pointer-events-none" />
+            <main className="doctor-content flex flex-col">
+                <div className="absolute inset-0 clinical-hologram opacity-40 pointer-events-none" />
                 
                 {/* Content Header (Top HUD) */}
-                <header className="h-20 border-b border-white/5 backdrop-blur-xl bg-slate-950/40 px-10 flex items-center justify-between z-10">
+                <header className="h-16 border-b border-emerald-500/10 backdrop-blur-xl bg-black/20 px-8 flex items-center justify-between z-10">
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
-                            <Command size={14} className="text-cyan-400" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active System Console</span>
+                            <Command size={14} className="text-emerald-400" />
+                            <span className="text-[10px] font-black text-emerald-600/80 uppercase tracking-widest">Active System Console</span>
                         </div>
-                        <div className="w-px h-4 bg-white/10" />
+                        <div className="w-px h-4 bg-emerald-500/20" />
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Sync Optimized</span>
+                            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                            <span className="text-[10px] font-black text-emerald-600/80 uppercase tracking-widest">Neural Sync Optimized</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button className="p-2 text-slate-500 hover:text-white transition-colors"><Settings size={18} /></button>
-                        <div className="w-px h-6 bg-white/10" />
+                        <button className="p-2 text-emerald-600 hover:text-emerald-300 transition-colors"><Settings size={16} /></button>
+                        <div className="w-px h-6 bg-emerald-500/20" />
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <p className="text-[10px] font-black text-white uppercase tracking-tighter">Sector 7-G</p>
-                                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Local Node</p>
+                                <p className="text-[10px] font-black text-emerald-100 uppercase tracking-tighter">Sector 7-G</p>
+                                <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">Local Node</p>
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-cyan-400">
-                                <Activity size={20} />
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                                <Activity size={16} />
                             </div>
                         </div>
                     </div>
                 </header>
 
                 {/* Main Viewport */}
-                <div className="flex-1 overflow-y-auto custom-scroll relative z-0">
+                <div className="flex-1 overflow-y-auto custom-scroll relative z-0 p-6">
                     <Outlet />
                 </div>
                 

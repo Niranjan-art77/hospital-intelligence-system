@@ -1,143 +1,184 @@
 .patient-layout {
     display: flex;
     min-height: 100vh;
-    background: #060d1f;
+    background: #1e1b4b; /* Deep Indigo */
+    color: #fdf4ff;
+    overflow: hidden;
 }
 
 .patient-sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: linear-gradient(180deg, #0a1628 0%, #071020 100%);
-    border-right: 1px solid rgba(168, 85, 247, 0.12);
+    background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+    border-right: 1px solid rgba(236, 72, 153, 0.15); /* Pink border */
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: 0;
     height: 100vh;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .psidebar-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 20px 18px;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+    gap: 16px;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(236, 72, 153, 0.1);
 }
 
 .pbrand-icon {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #a855f7, #7c3aed);
-    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #ec4899, #a855f7);
+    border-radius: 50%; /* Organic circle */
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
 }
 
 .pbrand-name {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #f0f6ff;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #fdf4ff;
+    letter-spacing: -0.025em;
 }
 
 .pbrand-role {
-    font-size: 0.7rem;
-    color: #a855f7;
+    font-size: 0.6rem;
+    color: #f472b6;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    margin-top: -2px;
 }
 
 .psidebar-nav {
     flex: 1;
-    padding: 12px 10px;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
+    overflow-y: auto;
 }
 
 .pnav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #94a3b8;
     text-decoration: none;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    border-radius: 20px; /* Soft rounded */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
 }
 
 .pnav-item:hover {
-    background: rgba(168, 85, 247, 0.08);
-    color: #e2f0ff;
+    background: rgba(236, 72, 153, 0.05);
 }
 
 .pnav-item.active {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(124, 58, 237, 0.1));
-    color: #c084fc;
-    border-left: 3px solid #a855f7;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.1));
+    border-color: rgba(236, 72, 153, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pnav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 4px;
+    background: #ec4899;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 10px #ec4899;
+}
+
+.patient-content {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    position: relative;
+    background: #0f0a1c;
+}
+
+/* Bio-Organic Floating Shapes */
+.bio-organic-bg {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.04) 0%, transparent 30%);
+    animation: bioPulse 15s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes bioPulse {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.1) rotate(5deg); }
 }
 
 .psidebar-user {
-    padding: 14px;
-    border-top: 1px solid rgba(168, 85, 247, 0.1);
+    padding: 16px;
+    border-top: 1px solid rgba(236, 72, 153, 0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .puser-info {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .puser-avatar {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ec4899, #a855f7);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 800;
     color: white;
-    font-size: 0.9rem;
-    flex-shrink: 0;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
 }
 
 .puser-name {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: #e2f0ff;
+    font-weight: 700;
+    color: #fdf4ff;
 }
 
 .puser-role {
     font-size: 0.7rem;
-    color: #64748b;
+    color: #f472b6;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .plogout-btn {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 8px;
-    color: #f87171;
+    border-radius: 12px;
+    color: #fca5a5;
     font-size: 0.8rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
 }
 
 .plogout-btn:hover {
     background: rgba(239, 68, 68, 0.2);
-}
-
-.patient-content {
-    flex: 1;
-    overflow-y: auto;
-    min-width: 0;
+    color: #fef2f2;
 }
