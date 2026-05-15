@@ -48,11 +48,11 @@ export default function AdminLayout() {
     );
 
     return (
-        <div className="admin-layout selection:bg-cyan-500/30">
+        <div className="admin-layout selection:bg-rose-500/30">
             <aside className={`admin-sidebar transition-all duration-500 relative ${isCollapsed ? "w-20 min-w-[80px]" : "w-72 min-w-[288px]"}`}>
                 {/* Branding */}
                 <div className="sidebar-brand relative overflow-hidden group">
-                    <div className="brand-icon shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                    <div className="brand-icon shadow-[0_0_20px_rgba(244,63,94,0.3)]">
                         <Shield size={24} className="text-white group-hover:rotate-12 transition-transform" />
                     </div>
                     {!isCollapsed && (
@@ -61,7 +61,7 @@ export default function AdminLayout() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex flex-col"
                         >
-                            <span className="brand-name tracking-tighter italic">NOVA <span className="text-cyan-400">HEALTH</span></span>
+                            <span className="brand-name tracking-tighter italic">NOVA <span className="text-rose-400">HEALTH</span></span>
                             <span className="brand-role">Command Center</span>
                         </motion.div>
                     )}
@@ -76,14 +76,14 @@ export default function AdminLayout() {
                 {/* Global Search */}
                 <div className="px-4 py-6">
                     <div className="relative group">
-                        <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-cyan-400 ${isCollapsed ? "left-1/2 -translate-x-1/2" : ""}`} size={16} />
+                        <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-rose-400 ${isCollapsed ? "left-1/2 -translate-x-1/2" : ""}`} size={16} />
                         {!isCollapsed && (
                             <input
                                 type="text"
                                 placeholder="Neural Search..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/30 transition-all"
+                                className="w-full bg-slate-900/50 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-white placeholder:text-slate-600 focus:outline-none focus:border-rose-500/30 transition-all"
                             />
                         )}
                         {isCollapsed && <div className="h-9 w-9 bg-slate-900/50 border border-white/5 rounded-xl mx-auto" />}
@@ -97,7 +97,7 @@ export default function AdminLayout() {
                             key={to} 
                             to={to} 
                             end={end} 
-                            className={({ isActive }) => `nav-item relative group ${isActive ? "active text-cyan-400" : "text-slate-500 hover:text-slate-300"}`}
+                            className={({ isActive }) => `nav-item relative group ${isActive ? "active text-rose-400" : "text-slate-500 hover:text-slate-300"}`}
                         >
                             <div className={`flex items-center gap-4 w-full transition-all duration-300 ${isCollapsed ? "justify-center" : "px-4 py-3"}`}>
                                 <Icon size={20} className="shrink-0 transition-transform group-hover:scale-110" />
@@ -132,13 +132,13 @@ export default function AdminLayout() {
 
                     <div className={`bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 ${isCollapsed ? "p-2" : "p-4"}`}>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-red-600 flex items-center justify-center text-white font-black shadow-lg shrink-0">
                                 {user?.fullName?.[0]?.toUpperCase()}
                             </div>
                             {!isCollapsed && (
                                 <div className="min-w-0">
                                     <div className="text-[11px] font-black text-white truncate uppercase tracking-tight">{user?.fullName}</div>
-                                    <div className="text-[9px] font-black text-cyan-500/60 uppercase tracking-widest">{user?.role}</div>
+                                    <div className="text-[9px] font-black text-rose-500/60 uppercase tracking-widest">{user?.role}</div>
                                 </div>
                             )}
                         </div>
@@ -154,7 +154,7 @@ export default function AdminLayout() {
                 </div>
                 
                 {/* Visual Flair */}
-                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-20" />
+                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-rose-500/50 to-transparent opacity-20" />
             </aside>
 
             <main className="admin-content relative">

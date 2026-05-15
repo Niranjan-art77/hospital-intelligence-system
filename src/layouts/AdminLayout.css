@@ -1,14 +1,14 @@
 .admin-layout {
     display: flex;
     min-height: 100vh;
-    background: #020617; /* Deep Navy */
-    color: #f8fafc;
+    background: #2a040d; /* Deep Ruby / Maroon */
+    color: #fff1f2;
     overflow: hidden;
 }
 
 .admin-sidebar {
-    background: linear-gradient(180deg, #0a1628 0%, #020617 100%);
-    border-right: 1px solid rgba(14, 165, 233, 0.15);
+    background: linear-gradient(180deg, #4c0519 0%, #2a040d 100%);
+    border-right: 1px solid rgba(225, 29, 72, 0.15);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -22,33 +22,33 @@
     align-items: center;
     gap: 16px;
     padding: 24px 20px;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+    border-bottom: 1px solid rgba(225, 29, 72, 0.1);
 }
 
 .brand-icon {
     width: 42px;
     height: 42px;
-    background: linear-gradient(135deg, #0891b2, #0e7490);
+    background: linear-gradient(135deg, #e11d48, #be123c);
     border-radius: 10px; /* Sharp corners */
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-    border: 1px solid rgba(6, 182, 212, 0.4);
+    box-shadow: 0 0 15px rgba(225, 29, 72, 0.4);
+    border: 1px solid rgba(244, 63, 94, 0.4);
 }
 
 .brand-name {
     font-weight: 900;
     font-size: 1.1rem;
-    color: #f8fafc;
+    color: #fff1f2;
     letter-spacing: -0.025em;
-    text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+    text-shadow: 0 0 10px rgba(225, 29, 72, 0.3);
 }
 
 .brand-role {
     font-size: 0.6rem;
-    color: #06b6d4;
+    color: #fb7185;
     text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 0.2em;
@@ -74,14 +74,14 @@
 }
 
 .nav-item:hover {
-    background: rgba(14, 165, 233, 0.05);
-    border-color: rgba(14, 165, 233, 0.1);
+    background: rgba(225, 29, 72, 0.05);
+    border-color: rgba(225, 29, 72, 0.1);
 }
 
 .nav-item.active {
-    background: rgba(6, 182, 212, 0.08);
-    border-color: rgba(6, 182, 212, 0.3);
-    box-shadow: inset 0 0 15px rgba(6, 182, 212, 0.1);
+    background: rgba(244, 63, 94, 0.08);
+    border-color: rgba(244, 63, 94, 0.3);
+    box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.1);
 }
 
 .nav-item.active::before {
@@ -91,9 +91,9 @@
     top: 25%;
     height: 50%;
     width: 3px;
-    background: #06b6d4;
+    background: #fb7185;
     border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 10px #06b6d4;
+    box-shadow: 0 0 10px #fb7185;
 }
 
 .admin-content {
@@ -101,7 +101,7 @@
     height: 100vh;
     overflow-y: auto;
     position: relative;
-    background: #01040f;
+    background: #1e030a;
 }
 
 /* Custom Scrollbar */
@@ -119,12 +119,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 182, 212, 0.2);
+    background: rgba(244, 63, 94, 0.2);
 }
 
 .medical-grid {
     background-image: 
-        radial-gradient(circle at 2px 2px, rgba(14, 165, 233, 0.1) 1px, transparent 0);
+        radial-gradient(circle at 2px 2px, rgba(225, 29, 72, 0.15) 1px, transparent 0);
     background-size: 40px 40px;
 }
 
@@ -140,7 +140,7 @@
     left: 0;
     width: 100%;
     height: 100px;
-    background: linear-gradient(0deg, rgba(6, 182, 212, 0.1) 0%, transparent 100%);
+    background: linear-gradient(0deg, rgba(244, 63, 94, 0.15) 0%, transparent 100%);
     animation: scanline 4s linear infinite;
     pointer-events: none;
 }

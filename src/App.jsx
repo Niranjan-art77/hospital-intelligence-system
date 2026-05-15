@@ -66,7 +66,6 @@ const RoleRoute = ({ children, allowedRoles }) => {
     if (user.role === "STAFF") return <Navigate to="/staff" replace />;
     if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
     if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
-    if (user.role === "PHARMACY") return <Navigate to="/pharmacy" replace />;
   }
   return children;
 };
@@ -80,7 +79,6 @@ const RootRedirect = () => {
   if (user.role === "STAFF") return <Navigate to="/staff" replace />;
   if (user.role === "DOCTOR") return <Navigate to="/doctor" replace />;
   if (user.role === "PATIENT") return <Navigate to="/patient" replace />;
-  if (user.role === "PHARMACY") return <Navigate to="/pharmacy" replace />;
   return <Navigate to="/login" replace />;
 };
 
@@ -146,18 +144,7 @@ export default function App() {
           <Route path="emergency-response" element={<EmergencyResponseMode />} />
         </Route>
 
-        {/* Pharmacy Routes */}
-        <Route path="/pharmacy" element={
-          <RoleRoute allowedRoles={["PHARMACY", "ADMIN"]}>
-            <PharmacyLayout />
-          </RoleRoute>
-        }>
-          <Route index element={<PharmacyDashboard />} />
-          <Route path="inventory" element={<PharmacyDashboard />} />
-          <Route path="prescriptions" element={<PharmacyDashboard />} />
-          <Route path="billing" element={<PharmacyDashboard />} />
-          <Route path="notifications" element={<NotificationCenter />} />
-        </Route>
+
 
         {/* Patient Routes */}
         <Route path="/patient" element={
