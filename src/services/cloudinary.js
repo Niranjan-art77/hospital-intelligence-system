@@ -55,7 +55,7 @@ export const getCloudinaryInfo = async (publicId, resourceType = 'image') => {
 };
 
 export const generateSecureUrl = (publicId, transformations = {}) => {
-    return \`https://res.cloudinary.com/\${CLOUDINARY_CLOUD_NAME}/image/upload/\${publicId}\`;
+    return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${publicId}`;
 };
 
 export const testCloudinaryConfig = async () => {
