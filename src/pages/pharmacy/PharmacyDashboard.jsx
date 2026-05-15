@@ -683,6 +683,7 @@ export default function PharmacyDashboard() {
                         </div>
                     </div>
                 </section>
+            </main>
             {/* Stock Update Modal */}
             <AnimatePresence>
                 {stockModal && (
