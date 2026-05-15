@@ -75,8 +75,10 @@ export default function PrescriptionManager() {
 
         try {
             const payload = {
-                patient: form.patientId,   // backend uses 'patient' field
-                doctor: user?.id || user?._id || '',
+                patient: form.patientId,   // for node backend
+                patientId: form.patientId, // for python backend
+                doctor: user?.id || user?._id || '',       // for node backend
+                doctorId: user?.id || user?._id || '',     // for python backend
                 appointmentId: form.appointmentId === 'DIRECT' ? null : form.appointmentId,
                 diagnosis: form.diagnosis,
                 notes: form.notes,
@@ -84,7 +86,7 @@ export default function PrescriptionManager() {
                 medications: validMeds  // include both for compatibility
             };
 
-            await API.post("/prescriptions", payload);
+            await API.post("/prescriptions/create", payload);
 
             setSuccess("BIOMETRIC PROTOCOL BROADCAST: Pharmacy Network Notified.");
             setForm({ patientId: "", appointmentId: "", diagnosis: "", notes: "" });

@@ -11,7 +11,7 @@ export default function AddPatient() {
         e.preventDefault();
         try {
             // 1. Create Patient
-            const patRes = await API.post("/patients", {
+            const patRes = await API.post("/patients/", {
                 name: form.name,
                 age: parseInt(form.age),
                 bloodGroup: form.bloodGroup,
