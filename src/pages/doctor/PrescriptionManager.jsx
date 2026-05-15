@@ -76,7 +76,7 @@ export default function PrescriptionManager() {
         try {
             const payload = {
                 patient: form.patientId,   // backend uses 'patient' field
-                doctor: user?.id || '',
+                doctor: user?.id || user?._id || '',
                 appointmentId: form.appointmentId === 'DIRECT' ? null : form.appointmentId,
                 diagnosis: form.diagnosis,
                 notes: form.notes,

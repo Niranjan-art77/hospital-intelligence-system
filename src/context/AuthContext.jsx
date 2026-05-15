@@ -17,7 +17,12 @@ export const AuthProvider = ({ children }) => {
         if (savedUser) {
             try {
                 const parsedUser = JSON.parse(savedUser);
-                setUser(parsedUser);
+                if (!parsedUser.token) {
+                    // Invalid legacy session missing a token.
+                    logout();
+                } else {
+                    setUser(parsedUser);
+                }
             } catch {
                 logout();
             }
@@ -29,7 +34,10 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await API.post("/auth/login", { email, password });
             if (response.data.success) {
-                const userData = response.data.user;
+                const userData = { ...response.data.user };
+                if (response.data.token) {
+                    userData.token = response.data.token;
+                }
                 setUser(userData);
                 localStorage.setItem("nova_user", JSON.stringify(userData));
                 return { success: true, user: userData };
