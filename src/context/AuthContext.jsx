@@ -50,9 +50,7 @@ export const AuthProvider = ({ children }) => {
             const response = await API.post("/auth/register", data);
             if (response.data.success && response.data.user) {
                 const userData = response.data.user;
-                // If the backend returns a user/token upon registration, log them in
-                setUser(userData);
-                localStorage.setItem("nova_user", JSON.stringify(userData));
+                // DO NOT auto log in. Force the user to login manually.
                 return { success: true, user: userData };
             }
             return response.data;

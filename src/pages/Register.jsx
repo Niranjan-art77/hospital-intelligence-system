@@ -47,14 +47,7 @@ export default function Register() {
         try {
             const res = await register(formData);
             if (res.success) {
-                // If the user is automatically logged in (AuthContext update)
-                const role = res.user?.role || formData.role;
-                if (role === "ADMIN") navigate("/admin");
-                else if (role === "STAFF") navigate("/admin");
-                else if (role === "DOCTOR") navigate("/doctor");
-                else if (role === "PATIENT") navigate("/patient");
-                else if (role === "PHARMACY") navigate("/pharmacy");
-                else navigate("/login");
+                navigate("/login", { state: { message: "Registration successful. Please login to continue." } });
             } else {
                 setError(res.message || "Enrollment sequence failed.");
                 setIsLoading(false);
