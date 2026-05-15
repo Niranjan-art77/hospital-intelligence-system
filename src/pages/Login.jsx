@@ -15,16 +15,24 @@ export default function Login() {
         e.preventDefault();
         setIsLoading(true);
         setError("");
-        const res = await login(email, password);
-        if (res.success) {
-            // Role-based redirect
-            const role = res.user?.role || "";
-            if (role === "ADMIN" || role === "STAFF") navigate("/admin");
-            else if (role === "DOCTOR") navigate("/doctor");
-            else if (role === "PATIENT") navigate("/patient");
-            else navigate("/admin"); // fallback
-        } else {
-            setError(res.message);
+        
+        try {
+            const res = await login(email, password);
+            if (res.success) {
+                const role = res.user?.role || "";
+                // Enhanced role-based redirect logic
+                if (role === "ADMIN") navigate("/admin");
+                else if (role === "STAFF") navigate("/admin"); // Staff currently uses admin layout paths or specialized staff dashboard
+                else if (role === "DOCTOR") navigate("/doctor");
+                else if (role === "PATIENT") navigate("/patient");
+                else if (role === "PHARMACY") navigate("/pharmacy");
+                else navigate("/admin"); // fallback
+            } else {
+                setError(res.message || "Authentication failed. Please verify credentials.");
+                setIsLoading(false);
+            }
+        } catch (err) {
+            setError("Terminal Link Failure: Unable to reach authentication server.");
             setIsLoading(false);
         }
     };

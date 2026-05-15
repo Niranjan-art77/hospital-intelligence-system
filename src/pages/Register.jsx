@@ -21,19 +21,46 @@ export default function Register() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
+    const validateForm = () => {
+        if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            setError("Invalid cyber-mail format. Please re-enter.");
+            return false;
+        }
+        if (formData.password.length < 6) {
+            setError("Security protocol requires at least 6 characters.");
+            return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            setError("Access keys do not match. Re-verify password.");
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            return setError("Passwords do not match!");
-        }
+        if (!validateForm()) return;
 
         setIsLoading(true);
         setError("");
-        const res = await register(formData);
-        if (res.success) {
-            navigate("/login");
-        } else {
-            setError(res.message);
+        
+        try {
+            const res = await register(formData);
+            if (res.success) {
+                // If the user is automatically logged in (AuthContext update)
+                const role = res.user?.role || formData.role;
+                if (role === "ADMIN") navigate("/admin");
+                else if (role === "STAFF") navigate("/admin");
+                else if (role === "DOCTOR") navigate("/doctor");
+                else if (role === "PATIENT") navigate("/patient");
+                else if (role === "PHARMACY") navigate("/pharmacy");
+                else navigate("/login");
+            } else {
+                setError(res.message || "Enrollment sequence failed.");
+                setIsLoading(false);
+            }
+        } catch (err) {
+            setError("Neural Link Interrupted: Registration service offline.");
             setIsLoading(false);
         }
     };

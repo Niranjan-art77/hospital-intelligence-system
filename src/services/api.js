@@ -40,13 +40,28 @@ API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config, response } = error;
+    
+    // Auto-logout on 401 Unauthorized
+    if (response?.status === 401) {
+        localStorage.removeItem("nova_user");
+        if (window.location.pathname !== "/login") {
+            window.location.href = "/login?session=expired";
+        }
+    }
+
     const shouldRetry = !response || (response.status >= 500 && response.status <= 504);
     if (shouldRetry && (!config.__retryCount || config.__retryCount < 2)) {
         config.__retryCount = (config.__retryCount || 0) + 1;
         await new Promise(resolve => setTimeout(resolve, 1000 * config.__retryCount));
         return API(config);
     }
-    const message = response?.data?.message || error.message || "Network Synchronization Error";
+
+    // Extract detailed error message
+    const message = response?.data?.message || 
+                    response?.data?.error || 
+                    error.message || 
+                    "System synchronization failure detected";
+    
     error.humanMessage = message;
     return Promise.reject(error);
   }

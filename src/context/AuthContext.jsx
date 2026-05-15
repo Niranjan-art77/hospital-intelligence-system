@@ -32,22 +32,36 @@ export const AuthProvider = ({ children }) => {
                 const userData = response.data.user;
                 setUser(userData);
                 localStorage.setItem("nova_user", JSON.stringify(userData));
-                // Return user so Login.jsx can read the role for redirect
                 return { success: true, user: userData };
             } else {
-                return { success: false, message: response.data.message };
+                return { success: false, message: response.data.message || "Invalid credentials" };
             }
         } catch (error) {
-            return { success: false, message: "Server connection failed!" };
+            console.error("Login error:", error);
+            return { 
+                success: false, 
+                message: error.humanMessage || "Access Denied: Authentication Protocol Failed" 
+            };
         }
     };
 
     const register = async (data) => {
         try {
             const response = await API.post("/auth/register", data);
+            if (response.data.success && response.data.user) {
+                const userData = response.data.user;
+                // If the backend returns a user/token upon registration, log them in
+                setUser(userData);
+                localStorage.setItem("nova_user", JSON.stringify(userData));
+                return { success: true, user: userData };
+            }
             return response.data;
         } catch (error) {
-            return { success: false, message: "Registration failed!" };
+            console.error("Registration error:", error);
+            return { 
+                success: false, 
+                message: error.humanMessage || "Enrollment Failed: Database Synchronization Error" 
+            };
         }
     };
 
